@@ -19,3 +19,22 @@ def test_color_excess():
         url=canonical_url)
 
     assert reduced_tutorial.url == canonical_url
+    assert reduced_tutorial.h1 == (
+        'Analyzing interstellar reddening and calculating synthetic photometry'
+    )
+    assert reduced_tutorial.authors == [
+        'Kristen Larson',
+        'Lia Corrales',
+        'Stephanie T. Douglas',
+        'Kelle Cruz'
+    ]
+    assert reduced_tutorial.keywords == [
+        'dust extinction',
+        'synphot',
+        'astroquery',
+        'units',
+        'photometry',
+        'extinction',
+        'physics',
+        'observational astronomy'
+    ]
