@@ -38,3 +38,54 @@ def test_color_excess():
         'physics',
         'observational astronomy'
     ]
+
+    assert reduced_tutorial.sections[0].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Learning Goals"
+    ]
+    assert reduced_tutorial.sections[1].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Keywords"
+    ]
+    assert reduced_tutorial.sections[2].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Companion Content"
+    ]
+    assert reduced_tutorial.sections[3].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Summary"
+    ]
+    assert reduced_tutorial.sections[4].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry"
+    ]
+    assert reduced_tutorial.sections[5].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Introduction"
+    ]
+    assert reduced_tutorial.sections[6].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 1: Investigate Extinction Models"
+    ]
+    assert reduced_tutorial.sections[7].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 2: Deredden a Spectrum"
+    ]
+    assert reduced_tutorial.sections[8].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 3: Calculate Color Excess with synphot",
+        "Exercise"
+    ]
+    assert reduced_tutorial.sections[9].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 3: Calculate Color Excess with synphot"
+    ]

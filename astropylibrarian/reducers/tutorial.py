@@ -9,6 +9,8 @@ from typing import List
 
 import lxml.html
 
+from .utils import iter_sphinx_sections, Section
+
 
 class ReducedTutorial:
     """A reduction of a notebook-based learn.astropy tutorial page into search
@@ -46,11 +48,19 @@ class ReducedTutorial:
         """
         return self._keywords
 
+    @property
+    def sections(self) -> List[Section]:
+        """The sections (`astropylibrarian.reducers.utils.Section`) that
+        are found within the content.
+        """
+        return self._sections
+
     def __init__(self, *, html_source: str, url: str):
         self._url = url
         self._h1: str = ''
         self._authors: List[str] = []
         self._keywords: List[str] = []
+        self._sections: List["Section"] = []
         self._process_html(html_source)
 
     def _process_html(self, html_source: str):
@@ -63,6 +73,30 @@ class ReducedTutorial:
 
         keywords_paragraph = doc.cssselect('#keywords p')[0]
         self._keywords = self._parse_comma_list(keywords_paragraph)
+
+        root_section = doc.cssselect('.card .section')[0]
+        for s in iter_sphinx_sections(
+                base_url=self._url,
+                root_section=root_section,
+                headers=[],
+                header_callback=lambda x: x.rstrip('¶'),
+                content_callback=lambda x: x.strip()):
+            self._sections.append(s)
+        # Also look for additional h1 section on the page.
+        # Technically, the page should only have one h1, and all content
+        # should be subsections of that. In real life, though, it's easy
+        # to accidentally use additional h1 eleemnts for subsections.
+        h1_heading = self._sections[-1].headings[-1]
+        for sibling in root_section.itersiblings(tag='div'):
+            if 'section' in sibling.classes:
+                for s in iter_sphinx_sections(
+                        root_section=sibling,
+                        base_url=self._url,
+                        headers=[h1_heading],
+                        header_callback=lambda x: x.rstrip('¶'),
+                        content_callback=lambda x: x.strip()
+                        ):
+                    self._sections.append(s)
 
     @staticmethod
     def _get_section_title(element: lxml.html.HtmlElement) -> str:
