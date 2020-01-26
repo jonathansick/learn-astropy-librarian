@@ -6,6 +6,7 @@ into search records.
 __all__ = ('ReducedTutorial',)
 
 from typing import List
+from urllib.parse import urljoin
 
 import lxml.html
 
@@ -49,6 +50,12 @@ class ReducedTutorial:
         return self._keywords
 
     @property
+    def images(self) -> List[str]:
+        """The URLs of images in the tutorial content.
+        """
+        return self._images
+
+    @property
     def sections(self) -> List[Section]:
         """The sections (`astropylibrarian.reducers.utils.Section`) that
         are found within the content.
@@ -60,6 +67,7 @@ class ReducedTutorial:
         self._h1: str = ''
         self._authors: List[str] = []
         self._keywords: List[str] = []
+        self._images: List[str] = []
         self._sections: List["Section"] = []
         self._process_html(html_source)
 
@@ -73,6 +81,11 @@ class ReducedTutorial:
 
         keywords_paragraph = doc.cssselect('#keywords p')[0]
         self._keywords = self._parse_comma_list(keywords_paragraph)
+
+        image_elements = doc.cssselect('.card .section img')
+        for image_element in image_elements:
+            img_src = image_element.attrib['src']
+            self._images.append(urljoin(self.url, img_src))
 
         root_section = doc.cssselect('.card .section')[0]
         for s in iter_sphinx_sections(

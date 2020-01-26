@@ -38,6 +38,9 @@ def test_color_excess():
         'physics',
         'observational astronomy'
     ]
+    assert reduced_tutorial.images[0] == (
+        'http://learn.astropy.org/_images/color-excess_9_0.png'
+    )
 
     assert reduced_tutorial.sections[0].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
