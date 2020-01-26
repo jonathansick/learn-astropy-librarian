@@ -8,6 +8,8 @@ import asyncio
 from algoliasearch.search_client import SearchClient
 import aiohttp
 
+from astropylibrarian.workflows.indextutorial import index_tutorial
+
 
 def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -50,5 +52,10 @@ async def run(args: argparse.Namespace) -> None:
     algolia_client = SearchClient.create(args.algolia_id, args.algolia_key)
     async with aiohttp.ClientSession() as http_client:
         print(f'Indexing {args.url}')
-        await asyncio.sleep(1)
+        await index_tutorial(
+            url=args.url,
+            http_client=http_client,
+            algolia_client=algolia_client,
+            index_name=f'{args.index}_{args.env}'
+        )
         print('Done')
