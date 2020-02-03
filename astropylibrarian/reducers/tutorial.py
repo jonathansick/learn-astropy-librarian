@@ -81,13 +81,22 @@ class ReducedTutorial:
     def _process_html(self, html_source: str):
         doc = lxml.html.document_fromstring(html_source)
 
-        self._h1 = self._get_section_title(doc.cssselect('h1')[0])
+        try:
+            self._h1 = self._get_section_title(doc.cssselect('h1')[0])
+        except IndexError:
+            pass
 
-        authors_paragraph = doc.cssselect('.card .section p')[0]
-        self._authors = self._parse_comma_list(authors_paragraph)
+        try:
+            authors_paragraph = doc.cssselect('.card .section p')[0]
+            self._authors = self._parse_comma_list(authors_paragraph)
+        except IndexError:
+            pass
 
-        keywords_paragraph = doc.cssselect('#keywords p')[0]
-        self._keywords = self._parse_comma_list(keywords_paragraph)
+        try:
+            keywords_paragraph = doc.cssselect('#keywords p')[0]
+            self._keywords = self._parse_comma_list(keywords_paragraph)
+        except IndexError:
+            pass
 
         try:
             summary_paragraph = doc.cssselect('#summary p')[0]
