@@ -41,6 +41,12 @@ def test_color_excess():
     assert reduced_tutorial.images[0] == (
         'http://learn.astropy.org/_images/color-excess_9_0.png'
     )
+    assert reduced_tutorial.summary == (
+        'In this tutorial, we will look at some extinction curves from the '
+        'literature, use one of those curves to deredden an observed spectrum'
+        ', and practice invoking a background source flux in order to '
+        'calculate magnitudes from an extinction model.'
+    )
 
     assert reduced_tutorial.sections[0].headings == [
         "Analyzing interstellar reddening and calculating synthetic "

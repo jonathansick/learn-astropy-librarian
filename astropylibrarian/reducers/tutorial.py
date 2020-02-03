@@ -50,6 +50,12 @@ class ReducedTutorial:
         return self._keywords
 
     @property
+    def summary(self) -> str:
+        """The tutorial's summary paragraph.
+        """
+        return self._summary
+
+    @property
     def images(self) -> List[str]:
         """The URLs of images in the tutorial content.
         """
@@ -67,6 +73,7 @@ class ReducedTutorial:
         self._h1: str = ''
         self._authors: List[str] = []
         self._keywords: List[str] = []
+        self._summary = ''
         self._images: List[str] = []
         self._sections: List["Section"] = []
         self._process_html(html_source)
@@ -81,6 +88,12 @@ class ReducedTutorial:
 
         keywords_paragraph = doc.cssselect('#keywords p')[0]
         self._keywords = self._parse_comma_list(keywords_paragraph)
+
+        try:
+            summary_paragraph = doc.cssselect('#summary p')[0]
+            self._summary = summary_paragraph.text_content().replace('\n', ' ')
+        except IndexError:
+            pass
 
         image_elements = doc.cssselect('.card .section img')
         for image_element in image_elements:
