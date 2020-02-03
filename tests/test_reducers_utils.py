@@ -2,31 +2,25 @@
 """Tests for the astropylibrarian.reducers.utils module.
 """
 
-from pathlib import Path
-
 import lxml.html
 
 from astropylibrarian.reducers.utils import iter_sphinx_sections
 
 
-def test_iter_sphinx_sections():
+def test_iter_sphinx_sections(color_excess_tutorial):
     """Test the iter_sphinx_sections algorithm using the color-excess.html
     notebook tutorial example.
 
     This example is made complicated by the fact that the heading levels are
     not strictly hierarchical. There are multiple "h1" tags.
     """
-    source_path = Path(__file__).parent / 'data' / 'tutorials' \
-        / 'color-excess.html'
-    source_html = source_path.read_text()
-    canonical_url = 'http://learn.astropy.org/rst-tutorials/color-excess.html'
-    doc = lxml.html.document_fromstring(source_html)
+    doc = lxml.html.document_fromstring(color_excess_tutorial.html)
     root = doc.cssselect('.card .section')[0]
 
     sections = []
     for s in iter_sphinx_sections(
             root_section=root,
-            base_url=canonical_url,
+            base_url=color_excess_tutorial.url,
             headers=[],
             header_callback=lambda x: x.rstrip('¶'),
             content_callback=lambda x: x.strip()
@@ -79,7 +73,7 @@ def test_iter_sphinx_sections():
         if 'section' in sibling.classes:
             for s in iter_sphinx_sections(
                     root_section=sibling,
-                    base_url=canonical_url,
+                    base_url=color_excess_tutorial.url,
                     headers=[h1_heading],
                     header_callback=lambda x: x.rstrip('¶'),
                     content_callback=lambda x: x.strip()

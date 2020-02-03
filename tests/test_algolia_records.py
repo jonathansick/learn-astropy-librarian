@@ -2,26 +2,20 @@
 """Tests for the astropylibrarian.algolia.records module.
 """
 
-from pathlib import Path
-
 from astropylibrarian.algolia.records import TutorialSectionRecord
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
 
-def test_tutorialsectionrecord():
-    source_path = Path(__file__).parent / 'data' / 'tutorials' \
-        / 'color-excess.html'
-    source_html = source_path.read_text()
-    canonical_url = 'http://learn.astropy.org/rst-tutorials/color-excess.html'
+def test_tutorialsectionrecord(color_excess_tutorial):
     reduced_tutorial = ReducedTutorial(
-        html_source=source_html,
-        url=canonical_url)
+        html_source=color_excess_tutorial.html,
+        url=color_excess_tutorial.url)
 
     record = TutorialSectionRecord(
         section=reduced_tutorial.sections[0],
         tutorial=reduced_tutorial)
 
-    assert record.base_url == canonical_url
+    assert record.base_url == color_excess_tutorial.url
     assert record.object_id == (
         'aHR0cDovL2xlYXJuLmFzdHJvcHkub3JnL3JzdC10dXRvcmlhbHMvY29sb3ItZXhjZXNz'
         'Lmh0bWwjbGVhcm5pbmctZ29hbHM=-QW5hbHl6aW5nIGludGVyc3RlbGxhciByZWRkZW5'
@@ -30,8 +24,8 @@ def test_tutorialsectionrecord():
     )
     assert record.data == {
         'objectID': record.object_id,
-        'baseUrl': canonical_url,
-        'url': f'{canonical_url}#learning-goals',
+        'baseUrl': color_excess_tutorial.url,
+        'url': f'{color_excess_tutorial.url}#learning-goals',
         'content': (
             'Investigate extinction curve shapes\n'
             'Deredden spectral energy distributions and spectra\n'
