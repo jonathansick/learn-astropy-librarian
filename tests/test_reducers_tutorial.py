@@ -92,3 +92,33 @@ def test_color_excess(color_excess_tutorial):
         "photometry",
         "Example 3: Calculate Color Excess with synphot"
     ]
+
+
+def test_coordinates_transform(coordinates_transform_tutorial):
+    """Test with the "Coordinates_Transform.html" dataset.
+    """
+    reduced_tutorial = ReducedTutorial(
+        html_source=coordinates_transform_tutorial.html,
+        url=coordinates_transform_tutorial.url)
+
+    assert reduced_tutorial.url == coordinates_transform_tutorial.url
+    assert reduced_tutorial.h1 == (
+        'Coords 2: Transforming between coordinate systems'
+    )
+    assert reduced_tutorial.authors == [
+        'Erik Tollerud', 'Kelle Cruz', 'Stephen Pardy', 'Stephanie T. Douglas'
+    ]
+    assert reduced_tutorial.keywords == [
+        'coordinates', 'units', 'observational astronomy'
+    ]
+    assert reduced_tutorial.images[0] == (
+        'http://learn.astropy.org/_images/Coordinates-Transform_51_0.png'
+    )
+    assert reduced_tutorial.summary == (
+        'In this tutorial we demonstrate how to define astronomical '
+        'coordinates using the astropy.coordinates “frame” classes. We then '
+        'show how to transform between the different built-in coordinate '
+        'frames, such as from ICRS (RA, Dec) to Galactic (l, b). Finally, we '
+        'show how to compute altitude and azimuth from a specific observing '
+        'site.'
+    )

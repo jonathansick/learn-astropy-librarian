@@ -28,3 +28,16 @@ def color_excess_tutorial():
     return TestHtml(
         html=source_path.read_text(),
         url='http://learn.astropy.org/rst-tutorials/color-excess.html')
+
+
+@pytest.fixture(scope='session')
+def coordinates_transform_tutorial():
+    """The Coordinates-Transform.html tutorial page.
+    """
+    source_path = Path(__file__).parent / 'data' / 'tutorials' \
+        / 'Coordinates-Transform.html'
+    return TestHtml(
+        html=source_path.read_text(),
+        url='http://learn.astropy.org/rst-tutorials/'
+            'Coordinates-Transform.html'
+    )
