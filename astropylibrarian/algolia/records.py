@@ -6,6 +6,7 @@ __all__ = ['TutorialSectionRecord']
 
 from base64 import b64encode
 from dataclasses import dataclass
+import datetime
 from typing import TYPE_CHECKING, Dict, Any
 from urllib.parse import urlparse, urlunparse
 
@@ -72,7 +73,8 @@ class TutorialSectionRecord:
             'importance': self.section.header_level,
             'contentType': 'tutorial',
             'authors': self.tutorial.authors,
-            'keywords': self.tutorial.keywords
+            'keywords': self.tutorial.keywords,
+            'dateIndexed': f'{datetime.datetime.now().isoformat()}Z'
         }
         for i, heading in enumerate(self.section.headings):
             record[f'h{i+1}'] = heading

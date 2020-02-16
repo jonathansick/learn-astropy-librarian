@@ -2,6 +2,8 @@
 """Tests for the astropylibrarian.algolia.records module.
 """
 
+import datetime
+
 from astropylibrarian.algolia.records import TutorialSectionRecord
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
@@ -22,7 +24,15 @@ def test_tutorialsectionrecord(color_excess_tutorial):
         'pbmcgYW5kIGNhbGN1bGF0aW5nIHN5bnRoZXRpYyBwaG90b21ldHJ5IExlYXJuaW5nIEd'
         'vYWxz'
     )
-    assert record.data == {
+    data = record.data
+
+    # Get the indexedDatetime field out because it's dynamic
+    indexed_datetime = data.pop('dateIndexed')
+    # Ensure it's formatted correctly
+    datetime.datetime.strptime(indexed_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    # Ensure that the structure of other sections matches the expectation
+    assert data == {
         'objectID': record.object_id,
         'baseUrl': color_excess_tutorial.url,
         'url': f'{color_excess_tutorial.url}#learning-goals',
