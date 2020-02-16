@@ -5,7 +5,10 @@
 __all__ = ['index_tutorial']
 
 import json
+import asyncio
 from typing import TYPE_CHECKING, List
+
+from algoliasearch.responses import MultipleResponse
 
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.algolia.records import TutorialSectionRecord
@@ -62,19 +65,18 @@ async def index_tutorial(
 
     records = [TutorialSectionRecord(section=s, tutorial=tutorial)
                for s in tutorial.sections]
+
     record_objects = [r.data for r in records]
     print(f'Indexing {len(record_objects)} objects')
 
-    for data in record_objects:
-        try:
-            json.dumps(data)
-        except Exception:
-            print(data)
-
-    print('json ok')
+    for r in record_objects:
+        print(json.dumps(r, indent=2))
 
     index = algolia_client.init_index(index_name)
-    index.save_objects(record_objects).wait()
+    tasks = [index.save_object_async(d) for d in record_objects]
+
+    results = await asyncio.gather(*tasks)
+    MultipleResponse(results).wait()
 
     # TODO Next step is to search for existing records about this URL
     # and delete and records that don't exist in the present record listing
