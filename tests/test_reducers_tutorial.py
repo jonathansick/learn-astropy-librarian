@@ -50,44 +50,34 @@ def test_color_excess(color_excess_tutorial):
     assert reduced_tutorial.sections[1].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
-        "Keywords"
+        "Companion Content"
     ]
     assert reduced_tutorial.sections[2].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
-        "photometry",
-        "Companion Content"
+        "photometry"
     ]
     assert reduced_tutorial.sections[3].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
-        "Summary"
-    ]
-    assert reduced_tutorial.sections[4].headings == [
-        "Analyzing interstellar reddening and calculating synthetic "
-        "photometry"
-    ]
-    assert reduced_tutorial.sections[5].headings == [
-        "Analyzing interstellar reddening and calculating synthetic "
-        "photometry",
         "Introduction"
     ]
-    assert reduced_tutorial.sections[6].headings == [
+    assert reduced_tutorial.sections[4].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
         "Example 1: Investigate Extinction Models"
     ]
-    assert reduced_tutorial.sections[7].headings == [
+    assert reduced_tutorial.sections[5].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
         "Example 2: Deredden a Spectrum"
     ]
-    assert reduced_tutorial.sections[8].headings == [
+    assert reduced_tutorial.sections[6].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
         "Example 3: Calculate Color Excess with synphot",
         "Exercise"
     ]
-    assert reduced_tutorial.sections[9].headings == [
+    assert reduced_tutorial.sections[7].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
         "Example 3: Calculate Color Excess with synphot"

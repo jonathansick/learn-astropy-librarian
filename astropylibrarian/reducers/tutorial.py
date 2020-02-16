@@ -76,6 +76,11 @@ class ReducedTutorial:
         self._summary = ''
         self._images: List[str] = []
         self._sections: List["Section"] = []
+
+        # These are headings for sections that should be ignored because
+        # they're part of the metadata.
+        self.ignored_headings = set(['authors', 'keywords', 'summary'])
+
         self._process_html(html_source)
 
     def _process_html(self, html_source: str):
@@ -116,7 +121,9 @@ class ReducedTutorial:
                 headers=[],
                 header_callback=lambda x: x.rstrip('¶'),
                 content_callback=lambda x: x.strip()):
-            self._sections.append(s)
+            if not self._is_ignored_section(s):
+                self._sections.append(s)
+
         # Also look for additional h1 section on the page.
         # Technically, the page should only have one h1, and all content
         # should be subsections of that. In real life, though, it's easy
@@ -131,7 +138,26 @@ class ReducedTutorial:
                         header_callback=lambda x: x.rstrip('¶'),
                         content_callback=lambda x: x.strip()
                         ):
-                    self._sections.append(s)
+                    if not self._is_ignored_section(s):
+                        self._sections.append(s)
+
+    def _is_ignored_section(self, section: Section) -> bool:
+        """Determine if a section should be ignored.
+
+        Uses the `ignored_headings` attribute to determine if a section should
+        be ignored.
+
+        Returns
+        -------
+        bool
+            `True` if the section should be ignored; `False` if it should be
+            accepted.
+        """
+        section_headings = set([h.lower() for h in section.headings])
+        if section_headings.intersection(self.ignored_headings):
+            return True
+        else:
+            return False
 
     @staticmethod
     def _get_section_title(element: lxml.html.HtmlElement) -> str:
