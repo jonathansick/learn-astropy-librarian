@@ -4,6 +4,7 @@
 
 __all__ = ['index_tutorial']
 
+import json
 from typing import TYPE_CHECKING, List
 
 from astropylibrarian.reducers.tutorial import ReducedTutorial
@@ -63,6 +64,14 @@ async def index_tutorial(
                for s in tutorial.sections]
     record_objects = [r.data for r in records]
     print(f'Indexing {len(record_objects)} objects')
+
+    for data in record_objects:
+        try:
+            json.dumps(data)
+        except Exception:
+            print(data)
+
+    print('json ok')
 
     index = algolia_client.init_index(index_name)
     index.save_objects(record_objects).wait()
