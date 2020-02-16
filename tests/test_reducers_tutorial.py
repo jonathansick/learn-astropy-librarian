@@ -56,6 +56,7 @@ def test_color_excess(color_excess_tutorial):
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry"
     ]
+    assert reduced_tutorial.sections[2].content == reduced_tutorial.summary
     assert reduced_tutorial.sections[3].headings == [
         "Analyzing interstellar reddening and calculating synthetic "
         "photometry",
@@ -112,3 +113,6 @@ def test_coordinates_transform(coordinates_transform_tutorial):
         'show how to compute altitude and azimuth from a specific observing '
         'site.'
     )
+    for section in reduced_tutorial.sections:
+        if section.header_level == 1:
+            assert section.content == reduced_tutorial.summary

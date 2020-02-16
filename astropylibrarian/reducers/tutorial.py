@@ -68,7 +68,7 @@ class ReducedTutorial:
         """
         return self._sections
 
-    def __init__(self, *, html_source: str, url: str):
+    def __init__(self, *, html_source: str, url: str) -> None:
         self._url = url
         self._h1: str = ''
         self._authors: List[str] = []
@@ -83,7 +83,11 @@ class ReducedTutorial:
 
         self._process_html(html_source)
 
-    def _process_html(self, html_source: str):
+        self._set_summary_on_h1_section()
+
+    def _process_html(self, html_source: str) -> None:
+        """
+        """
         doc = lxml.html.document_fromstring(html_source)
 
         try:
@@ -158,6 +162,14 @@ class ReducedTutorial:
             return True
         else:
             return False
+
+    def _set_summary_on_h1_section(self) -> None:
+        """Replaces the content of the "h1" section, which should be empty,
+        with the summary.
+        """
+        for section in self.sections:
+            if section.header_level == 1:
+                section.content = self.summary
 
     @staticmethod
     def _get_section_title(element: lxml.html.HtmlElement) -> str:
