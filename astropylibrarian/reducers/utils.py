@@ -99,6 +99,7 @@ def iter_sphinx_sections(
             )
         else:
             if content_callback:
+                print('cleaning content')
                 text_elements.append(content_callback(element.text_content()))
             else:
                 text_elements.append(element.text_content())

@@ -124,7 +124,7 @@ class ReducedTutorial:
                 root_section=root_section,
                 headers=[],
                 header_callback=lambda x: x.rstrip('¶'),
-                content_callback=lambda x: x.strip()):
+                content_callback=clean_content):
             if not self._is_ignored_section(s):
                 self._sections.append(s)
 
@@ -140,8 +140,7 @@ class ReducedTutorial:
                         base_url=self._url,
                         headers=[h1_heading],
                         header_callback=lambda x: x.rstrip('¶'),
-                        content_callback=lambda x: x.strip()
-                        ):
+                        content_callback=clean_content):
                     if not self._is_ignored_section(s):
                         self._sections.append(s)
 
@@ -179,3 +178,11 @@ class ReducedTutorial:
     def _parse_comma_list(element: lxml.html.HtmlElement) -> List[str]:
         content = element.text_content()
         return [s.strip() for s in content.split(',')]
+
+
+def clean_content(x: str) -> str:
+    x = x.strip()
+    x = x.replace(r'\n', ' ')
+    x = x.replace('\n', ' ')
+    x = x.replace('\\', ' ')
+    return x
