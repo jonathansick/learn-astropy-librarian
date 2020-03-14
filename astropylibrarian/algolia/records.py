@@ -5,10 +5,12 @@
 __all__ = ['TutorialSectionRecord']
 
 from base64 import b64encode
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import datetime
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Dict, Any, List
 from urllib.parse import urlparse, urlunparse
+
+from astropylibrarian.keywords import KeywordDb
 
 if TYPE_CHECKING:
     from astropylibrarian.reducers.utils import Section
@@ -29,6 +31,9 @@ class TutorialSectionRecord:
     """The reduced tutorial page that this record is associated with
     (`astropylibrarian.reducers.tutorial.ReducedTutorial`).
     """
+
+    keyworddb: KeywordDb = field(default_factory=KeywordDb.load)
+    """Keyword database."""
 
     @property
     def object_id(self) -> str:
@@ -62,6 +67,30 @@ class TutorialSectionRecord:
         ))
 
     @property
+    def astropy_package_keywords(self) -> List[str]:
+        """The list of "Astropy package" keywords."""
+        return self.keyworddb.get_astropy_package_keywords(
+            self.tutorial.keywords)
+
+    @property
+    def python_package_keywords(self) -> List[str]:
+        """The list of "Python package" keywords."""
+        return self.keyworddb.get_python_package_keywords(
+            self.tutorial.keywords)
+
+    @property
+    def task_keywords(self) -> List[str]:
+        """The list of "task" keywords."""
+        return self.keyworddb.get_task_keywords(
+            self.tutorial.keywords)
+
+    @property
+    def science_keywords(self) -> List[str]:
+        """The list of "science" keywords."""
+        return self.keyworddb.get_science_keywords(
+            self.tutorial.keywords)
+
+    @property
     def data(self) -> Dict[str, Any]:
         """The JSON-encodable record, ready for indexing by Algolia.
         """
@@ -73,7 +102,10 @@ class TutorialSectionRecord:
             'importance': self.section.header_level,
             'contentType': 'tutorial',
             'authors': self.tutorial.authors,
-            'keywords': self.tutorial.keywords,
+            'astropy_package_keywords': self.astropy_package_keywords,
+            'python_package_keywords': self.python_package_keywords,
+            'task_keywords': self.task_keywords,
+            'science_keywords': self.science_keywords,
             'dateIndexed': f'{datetime.datetime.now().isoformat()}Z'
         }
         for i, heading in enumerate(self.section.headings):
