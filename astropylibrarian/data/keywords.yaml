@@ -1,23 +1,53 @@
 astropy_package:
   - astroquery
-  - coordinates
+  - coordinates:
+      - astropy.coordinates
   - astroplan
   - reproject
-  - table
+  - table:
+      - astropy.table
   - spectral cube
   - aplpy
   - imexam
   - specutils
   - photutils
-  - wcs
-  - units
-  - time
+  - wcs:
+      - astropy.wcs
+  - units:
+      - astropy.units
+  - time:
+      - astropy.time
   - synphot
-  - dust extinction
-  - modeling
-  - convolution
+  - dust_extinction:
+      - dust extinction
+  - modeling:
+      - astropy.modelling
+  - convolution:
+      - astropy.convolution
   - gala
   - vo conesearch
+  - constants:
+      - astropy.constants
+  - nddata:
+      - astropy.nddata
+  - timeseries:
+      - astropy.timeseries
+  - uncertainty:
+      - astropy.uncertainty
+  - io:
+      - astropy.io
+  - samp:
+      - astropy.samp
+  - cosmology:
+      - astropy.cosmology
+  - visualization:
+      - astropy.visualization
+  - stats:
+      - astropy.stats
+  - config:
+      - astropy.config
+  - utils:
+      - astropy.utils
 
 python_package:
   - matplotlib
@@ -34,11 +64,11 @@ task:
   - file input/output
   - histogram
   - error bars
-  - oop
+  - object-oriented programming:
+      - oop
   - scatter plots
   - spectroscopy
   - time series
-  - units
   - vizier
   - photometry
   - colorbar
