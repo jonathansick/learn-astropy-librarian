@@ -27,24 +27,24 @@ python_package:
 task:
   - contour plots
   - data cubes
-  - FITS
+  - fits
   - image analysis
   - image manipulation
   - model fitting
   - file input/output
   - histogram
   - error bars
-  - OOP
+  - oop
   - scatter plots
   - spectroscopy
   - time series
   - units
-  - Vizier
+  - vizier
   - photometry
   - colorbar
-  - LaTeX
+  - latex
   - modular code
-  - Simbad
+  - simbad
 
 science:
   - astrodynamics
