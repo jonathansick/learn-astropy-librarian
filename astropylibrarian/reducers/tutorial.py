@@ -50,6 +50,12 @@ class ReducedTutorial:
         return self._keywords
 
     @property
+    def summary(self) -> str:
+        """The tutorial's summary paragraph.
+        """
+        return self._summary
+
+    @property
     def images(self) -> List[str]:
         """The URLs of images in the tutorial content.
         """
@@ -62,25 +68,50 @@ class ReducedTutorial:
         """
         return self._sections
 
-    def __init__(self, *, html_source: str, url: str):
+    def __init__(self, *, html_source: str, url: str) -> None:
         self._url = url
         self._h1: str = ''
         self._authors: List[str] = []
         self._keywords: List[str] = []
+        self._summary = ''
         self._images: List[str] = []
         self._sections: List["Section"] = []
+
+        # These are headings for sections that should be ignored because
+        # they're part of the metadata.
+        self.ignored_headings = set(['authors', 'keywords', 'summary'])
+
         self._process_html(html_source)
 
-    def _process_html(self, html_source: str):
+        self._set_summary_on_h1_section()
+
+    def _process_html(self, html_source: str) -> None:
+        """
+        """
         doc = lxml.html.document_fromstring(html_source)
 
-        self._h1 = self._get_section_title(doc.cssselect('h1')[0])
+        try:
+            self._h1 = self._get_section_title(doc.cssselect('h1')[0])
+        except IndexError:
+            pass
 
-        authors_paragraph = doc.cssselect('.card .section p')[0]
-        self._authors = self._parse_comma_list(authors_paragraph)
+        try:
+            authors_paragraph = doc.cssselect('.card .section p')[0]
+            self._authors = self._parse_comma_list(authors_paragraph)
+        except IndexError:
+            pass
 
-        keywords_paragraph = doc.cssselect('#keywords p')[0]
-        self._keywords = self._parse_comma_list(keywords_paragraph)
+        try:
+            keywords_paragraph = doc.cssselect('#keywords p')[0]
+            self._keywords = self._parse_comma_list(keywords_paragraph)
+        except IndexError:
+            pass
+
+        try:
+            summary_paragraph = doc.cssselect('#summary p')[0]
+            self._summary = summary_paragraph.text_content().replace('\n', ' ')
+        except IndexError:
+            pass
 
         image_elements = doc.cssselect('.card .section img')
         for image_element in image_elements:
@@ -94,7 +125,9 @@ class ReducedTutorial:
                 headers=[],
                 header_callback=lambda x: x.rstrip('¶'),
                 content_callback=lambda x: x.strip()):
-            self._sections.append(s)
+            if not self._is_ignored_section(s):
+                self._sections.append(s)
+
         # Also look for additional h1 section on the page.
         # Technically, the page should only have one h1, and all content
         # should be subsections of that. In real life, though, it's easy
@@ -109,7 +142,34 @@ class ReducedTutorial:
                         header_callback=lambda x: x.rstrip('¶'),
                         content_callback=lambda x: x.strip()
                         ):
-                    self._sections.append(s)
+                    if not self._is_ignored_section(s):
+                        self._sections.append(s)
+
+    def _is_ignored_section(self, section: Section) -> bool:
+        """Determine if a section should be ignored.
+
+        Uses the `ignored_headings` attribute to determine if a section should
+        be ignored.
+
+        Returns
+        -------
+        bool
+            `True` if the section should be ignored; `False` if it should be
+            accepted.
+        """
+        section_headings = set([h.lower() for h in section.headings])
+        if section_headings.intersection(self.ignored_headings):
+            return True
+        else:
+            return False
+
+    def _set_summary_on_h1_section(self) -> None:
+        """Replaces the content of the "h1" section, which should be empty,
+        with the summary.
+        """
+        for section in self.sections:
+            if section.header_level == 1:
+                section.content = self.summary
 
     @staticmethod
     def _get_section_title(element: lxml.html.HtmlElement) -> str:
