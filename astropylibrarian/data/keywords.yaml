@@ -1,93 +1,93 @@
 astropy_package:
-  - astroquery
-  - coordinates:
-      - astropy.coordinates
-  - astroplan
-  - reproject
-  - table:
-      - astropy.table
-  - spectral cube
   - aplpy
-  - imexam
-  - specutils
-  - photutils
-  - wcs:
-      - astropy.wcs
-  - units:
-      - astropy.units
-  - time:
-      - astropy.time
-  - synphot
-  - dust_extinction:
-      - dust extinction
-  - modeling:
-      - astropy.modelling
+  - astroplan
+  - astroquery
+  - config:
+      - astropy.config
   - convolution:
       - astropy.convolution
-  - gala
-  - vo conesearch
   - constants:
       - astropy.constants
+  - coordinates:
+      - astropy.coordinates
+  - cosmology:
+      - astropy.cosmology
+  - dust_extinction:
+      - dust extinction
+  - gala
+  - imexam
+  - io:
+      - astropy.io
+  - modeling:
+      - astropy.modeling
   - nddata:
       - astropy.nddata
+  - photutils
+  - reproject
+  - samp:
+      - astropy.samp
+  - spectral cube
+  - specutils
+  - stats:
+      - astropy.stats
+  - synphot
+  - table:
+      - astropy.table
+  - time:
+      - astropy.time
   - timeseries:
       - astropy.timeseries
   - uncertainty:
       - astropy.uncertainty
-  - io:
-      - astropy.io
-  - samp:
-      - astropy.samp
-  - cosmology:
-      - astropy.cosmology
-  - visualization:
-      - astropy.visualization
-  - stats:
-      - astropy.stats
-  - config:
-      - astropy.config
+  - units:
+      - astropy.units
   - utils:
       - astropy.utils
+  - visualization:
+      - astropy.visualization
+  - vo conesearch
+  - wcs:
+      - astropy.wcs
 
 python_package:
   - matplotlib
   - numpy
   - scipy
 
+science:
+  - astrodynamics
+  - astrometry
+  - astrostatistics
+  - extinction
+  - galactic astronomy
+  - galaxy dynamics
+  - observational astronomy
+  - physics
+  - polarimetry
+  - radio astronomy
+  - stellar evolution
+  - stellar photometry
+  - stellar physics
+  - x-ray astronomy
+
 task:
+  - colorbar
   - contour plots
   - data cubes
+  - error bars
+  - file input/output
   - fits
+  - histogram
   - image analysis
   - image manipulation
+  - latex
   - model fitting
-  - file input/output
-  - histogram
-  - error bars
+  - modular code
   - object-oriented programming:
       - oop
+  - photometry
   - scatter plots
+  - simbad
   - spectroscopy
   - time series
   - vizier
-  - photometry
-  - colorbar
-  - latex
-  - modular code
-  - simbad
-
-science:
-  - astrodynamics
-  - stellar photometry
-  - stellar physics
-  - radio astronomy
-  - astrostatistics
-  - x-ray astronomy
-  - galactic astronomy
-  - galaxy dynamics
-  - stellar evolution
-  - physics
-  - observational astronomy
-  - astrometry
-  - extinction
-  - polarimetry

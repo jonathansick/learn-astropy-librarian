@@ -7,3 +7,5 @@ repos:
       - id: check-json
       - id: check-yaml
         args: ["--allow-multiple-documents"]
+      - id: sort-simple-yaml
+        files: keywords\.yaml$
