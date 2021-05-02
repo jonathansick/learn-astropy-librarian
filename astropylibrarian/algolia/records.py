@@ -69,26 +69,27 @@ class TutorialSectionRecord:
     @property
     def astropy_package_keywords(self) -> List[str]:
         """The list of "Astropy package" keywords."""
-        return self.keyworddb.get_astropy_package_keywords(
-            self.tutorial.keywords)
+        return self.keyworddb.filter_keywords(
+            self.tutorial.keywords, 'astropy_package'
+        )
 
     @property
     def python_package_keywords(self) -> List[str]:
         """The list of "Python package" keywords."""
-        return self.keyworddb.get_python_package_keywords(
-            self.tutorial.keywords)
+        return self.keyworddb.filter_keywords(
+            self.tutorial.keywords, 'python_package')
 
     @property
     def task_keywords(self) -> List[str]:
         """The list of "task" keywords."""
-        return self.keyworddb.get_task_keywords(
-            self.tutorial.keywords)
+        return self.keyworddb.filter_keywords(
+            self.tutorial.keywords, 'task')
 
     @property
     def science_keywords(self) -> List[str]:
         """The list of "science" keywords."""
-        return self.keyworddb.get_science_keywords(
-            self.tutorial.keywords)
+        return self.keyworddb.filter_keywords(
+            self.tutorial.keywords, 'science')
 
     @property
     def data(self) -> Dict[str, Any]:

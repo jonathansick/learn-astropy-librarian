@@ -20,7 +20,7 @@ def test_get_astropy_package_keywords() -> None:
     ]
 
     keyworddb = KeywordDb.load()
-    assert keyworddb.get_astropy_package_keywords(inputs) == outputs
+    assert keyworddb.filter_keywords(inputs, 'astropy_package') == outputs
 
 
 def test_get_python_package_keywords() -> None:
@@ -32,7 +32,7 @@ def test_get_python_package_keywords() -> None:
     outputs = ["numpy"]
 
     keyworddb = KeywordDb.load()
-    assert keyworddb.get_python_package_keywords(inputs) == outputs
+    assert keyworddb.filter_keywords(inputs, 'python_package') == outputs
 
 
 def test_task_keywords() -> None:
@@ -44,7 +44,7 @@ def test_task_keywords() -> None:
     outputs = ["contour plots", "object-oriented programming"]
 
     keyworddb = KeywordDb.load()
-    assert keyworddb.get_task_keywords(inputs) == outputs
+    assert keyworddb.filter_keywords(inputs, 'task') == outputs
 
 
 def test_science_keywords() -> None:
@@ -61,4 +61,4 @@ def test_science_keywords() -> None:
     ]
 
     keyworddb = KeywordDb.load()
-    assert keyworddb.get_science_keywords(inputs) == outputs
+    assert keyworddb.filter_keywords(inputs, 'science') == outputs

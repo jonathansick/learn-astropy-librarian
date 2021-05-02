@@ -29,15 +29,8 @@ class KeywordDb:
         Keywords in the "science" group.
     """
 
-    def __init__(
-        self, *, astropy_package: KeywordTable,
-        python_package: KeywordTable, task: KeywordTable,
-        science: KeywordTable
-    ) -> None:
-        self._astropy_package_keywords = astropy_package
-        self._python_package_keywords = python_package
-        self._task_keywords = task
-        self._science_keywords = science
+    def __init__(self, **kwargs: KeywordTable) -> None:
+        self._keyword_groups = kwargs
 
     @classmethod
     def load(cls, path: Optional[Path] = None) -> 'KeywordDb':
@@ -59,21 +52,13 @@ class KeywordDb:
 
         db = yaml.safe_load(path.read_text())
 
-        astropy_package_keywords = cls._load_keyword_table(
-            db['astropy_package'])
-        python_package_keywords = cls._load_keyword_table(
-            db['python_package'])
-        task_keywords = cls._load_keyword_table(
-            db['task'])
-        science_keywords = cls._load_keyword_table(
-            db['science'])
+        keyword_groups: Dict[str, KeywordTable] = {}
+        for group_name in db:
+            keyword_groups[group_name] = cls._load_keyword_table(
+                db[group_name]
+            )
 
-        return cls(
-            astropy_package=astropy_package_keywords,
-            python_package=python_package_keywords,
-            task=task_keywords,
-            science=science_keywords
-        )
+        return cls(**keyword_groups)
 
     @staticmethod
     def _load_keyword_table(group) -> KeywordTable:
@@ -88,47 +73,37 @@ class KeywordDb:
             keywords[keyword] = alternatives
         return keywords
 
-    def get_astropy_package_keywords(
-            self, input_keywords: List[str]) -> List[str]:
-        """Get the list of "Astropy package" type keywords from an input list
-        of keywords that might include other type of keywords and alternate
-        forms of keywords.
-        """
-        return self._get_keywords_in_table(
-            table=self._astropy_package_keywords,
-            input_keywords=input_keywords)
+    def filter_keywords(
+            self,
+            input_keywords: List[str],
+            keyword_group: str
+    ) -> List[str]:
+        """Filter keywords for a specific group.
 
-    def get_python_package_keywords(
-            self, input_keywords: List[str]) -> List[str]:
-        """Get the list of "Python package" type keywords from an input list
-        of keywords that might include other type of keywords and alternate
-        forms of keywords.
-        """
-        return self._get_keywords_in_table(
-            table=self._python_package_keywords,
-            input_keywords=input_keywords)
+        Parameters
+        ----------
+        input_keywords : list of str
+            Input keywords are keywords accessed from a source document.
+        keyword_group : str
+            Name of the keyword group. This is a root-level key in
+            astropylibrarian's ``keywords.yaml``
 
-    def get_task_keywords(
-            self, input_keywords: List[str]) -> List[str]:
-        """Get the list of "task" type keywords from an input list
-        of keywords that might include other type of keywords and alternate
-        forms of keywords.
+        Returns
+        -------
+        list of str
+            Keywords that correspond to the keyword group. These keywords
+            are normalized to match the vocabulary in ``keywords.yaml`` (some
+            input keywords may be replaced with synonyms).
         """
-        return self._get_keywords_in_table(
-            table=self._task_keywords,
-            input_keywords=input_keywords)
+        try:
+            table = self._keyword_groups[keyword_group]
+        except KeyError:
+            raise ValueError(
+                f'Keyword group {keyword_group} is unknown. Available groups '
+                f'are: {self._keyword_groups.keys()}.'
+            )
 
-    def get_science_keywords(
-            self, input_keywords: List[str]) -> List[str]:
-        """Get the list of "science" type keywords from an input list
-        of keywords that might include other type of keywords and alternate
-        forms of keywords.
-        """
-        return self._get_keywords_in_table(
-            table=self._science_keywords,
-            input_keywords=input_keywords)
-
-    def _get_keywords_in_table(self, *, table, input_keywords) -> List[str]:
+        # Normalize the input keywords
         input_keywords = [k.lower().strip() for k in input_keywords]
 
         output_keywords: List[str] = []
