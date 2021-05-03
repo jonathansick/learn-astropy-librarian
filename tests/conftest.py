@@ -20,7 +20,7 @@ class TestHtml:
 
 
 @pytest.fixture(scope='session')
-def color_excess_tutorial():
+def color_excess_tutorial() -> TestHtml:
     """The color-excess.html tutorial page.
     """
     source_path = Path(__file__).parent / 'data' / 'tutorials' \
@@ -31,7 +31,7 @@ def color_excess_tutorial():
 
 
 @pytest.fixture(scope='session')
-def coordinates_transform_tutorial():
+def coordinates_transform_tutorial() -> TestHtml:
     """The Coordinates-Transform.html tutorial page.
     """
     source_path = Path(__file__).parent / 'data' / 'tutorials' \

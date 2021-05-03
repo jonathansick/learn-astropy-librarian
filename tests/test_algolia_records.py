@@ -2,13 +2,19 @@
 """Tests for the astropylibrarian.algolia.records module.
 """
 
+from __future__ import annotations
+
 import datetime
+from typing import TYPE_CHECKING
 
 from astropylibrarian.algolia.records import TutorialSectionRecord
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
+if TYPE_CHECKING:
+    from .conftest import TestHtml
 
-def test_tutorialsectionrecord(color_excess_tutorial):
+
+def test_tutorialsectionrecord(color_excess_tutorial: TestHtml) -> None:
     reduced_tutorial = ReducedTutorial(
         html_source=color_excess_tutorial.html,
         url=color_excess_tutorial.url)
