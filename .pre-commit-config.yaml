@@ -9,3 +9,8 @@ repos:
         args: ["--allow-multiple-documents"]
       - id: sort-simple-yaml
         files: keywords\.yaml$
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
