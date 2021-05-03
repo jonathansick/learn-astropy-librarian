@@ -1,0 +1,93 @@
+astropy_package:
+  - aplpy
+  - astroplan
+  - astroquery
+  - config:
+      - astropy.config
+  - convolution:
+      - astropy.convolution
+  - constants:
+      - astropy.constants
+  - coordinates:
+      - astropy.coordinates
+  - cosmology:
+      - astropy.cosmology
+  - dust_extinction:
+      - dust extinction
+  - gala
+  - imexam
+  - io:
+      - astropy.io
+  - modeling:
+      - astropy.modeling
+  - nddata:
+      - astropy.nddata
+  - photutils
+  - reproject
+  - samp:
+      - astropy.samp
+  - spectral cube
+  - specutils
+  - stats:
+      - astropy.stats
+  - synphot
+  - table:
+      - astropy.table
+  - time:
+      - astropy.time
+  - timeseries:
+      - astropy.timeseries
+  - uncertainty:
+      - astropy.uncertainty
+  - units:
+      - astropy.units
+  - utils:
+      - astropy.utils
+  - visualization:
+      - astropy.visualization
+  - vo conesearch
+  - wcs:
+      - astropy.wcs
+
+python_package:
+  - matplotlib
+  - numpy
+  - scipy
+
+science:
+  - astrodynamics
+  - astrometry
+  - astrostatistics
+  - extinction
+  - galactic astronomy
+  - galaxy dynamics
+  - observational astronomy
+  - physics
+  - polarimetry
+  - radio astronomy
+  - stellar evolution
+  - stellar photometry
+  - stellar physics
+  - x-ray astronomy
+
+task:
+  - colorbar
+  - contour plots
+  - data cubes
+  - error bars
+  - file input/output
+  - fits
+  - histogram
+  - image analysis
+  - image manipulation
+  - latex
+  - model fitting
+  - modular code
+  - object-oriented programming:
+      - oop
+  - photometry
+  - scatter plots
+  - simbad
+  - spectroscopy
+  - time series
+  - vizier

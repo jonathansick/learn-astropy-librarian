@@ -4,7 +4,12 @@
 
 __all__ = ['index_tutorial']
 
+import json
+import asyncio
+import logging
 from typing import TYPE_CHECKING, List
+
+from algoliasearch.responses import MultipleResponse
 
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.algolia.records import TutorialSectionRecord
@@ -13,6 +18,9 @@ from .download import download_html
 if TYPE_CHECKING:
     import aiohttp
     from algoliasearch.search_client import SearchClient
+
+
+logger = logging.getLogger(__name__)
 
 
 async def index_tutorial(
@@ -55,17 +63,24 @@ async def index_tutorial(
        <https://www.algolia.com/doc/api-reference/api-methods/save-objects/>`_)
     """
     tutorial_html = await download_html(url=url, http_client=http_client)
-    print(f'Downloaded {url}')
+    logger.debug('Downloaded %s')
 
     tutorial = ReducedTutorial(html_source=tutorial_html, url=url)
 
     records = [TutorialSectionRecord(section=s, tutorial=tutorial)
                for s in tutorial.sections]
+
     record_objects = [r.data for r in records]
-    print(f'Indexing {len(record_objects)} objects')
+    logger.debug(f'Indexing {len(record_objects)} objects')
+
+    for r in record_objects:
+        logger.debug(json.dumps(r, indent=2))
 
     index = algolia_client.init_index(index_name)
-    index.save_objects(record_objects).wait()
+    tasks = [index.save_object_async(d) for d in record_objects]
+
+    results = await asyncio.gather(*tasks)
+    MultipleResponse(results).wait()
 
     # TODO Next step is to search for existing records about this URL
     # and delete and records that don't exist in the present record listing

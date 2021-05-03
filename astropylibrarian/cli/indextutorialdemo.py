@@ -4,6 +4,7 @@
 
 import argparse
 import asyncio
+import logging
 
 from algoliasearch.search_client import SearchClient
 import aiohttp
@@ -38,7 +39,27 @@ def make_parser() -> argparse.ArgumentParser:
         '--algolia-key',
         type=str,
         help='Algolia application key')
+    parser.add_argument(
+        '-l', '--log-level',
+        choices=['debug', 'info', 'warn', 'error'],
+        default='info',
+        help='Logging level')
     return parser
+
+
+def configure_logging(log_level: str) -> None:
+    """Set up with logging format and level."""
+    log_level = log_level.upper()
+    if log_level == "DEBUG":
+        # Include the module name in the logging for easier debugging
+        log_format = "%(asctime)s %(levelname)8s $(name)s | %(message)s"
+    else:
+        log_format = "%(levelname)s: %(message)s"
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(log_format))
+    logger = logging.getLogger("astropylibrarian")
+    logger.addHandler(handler)
+    logger.setLevel(log_level)
 
 
 def main() -> None:
@@ -49,13 +70,15 @@ def main() -> None:
 
 
 async def run(args: argparse.Namespace) -> None:
+    configure_logging(args.log_level)
+    logger = logging.getLogger(__name__)
     algolia_client = SearchClient.create(args.algolia_id, args.algolia_key)
     async with aiohttp.ClientSession() as http_client:
-        print(f'Indexing {args.url}')
+        logger.info('Indexing %s', args.url)
         await index_tutorial(
             url=args.url,
             http_client=http_client,
             algolia_client=algolia_client,
             index_name=f'{args.index}_{args.env}'
         )
-        print('Done')
+        logger.info('Done')
