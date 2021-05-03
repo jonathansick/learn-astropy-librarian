@@ -1,13 +1,13 @@
-#################
-astropy-librarian
-#################
+#######################
+learn-astropy-librarian
+#######################
 
-The content crawler that supplies Astropy's web search.
+The content crawler that supplies Learn Astropy's web search.
 
 Development primer
 ==================
 
-Before developing astropy-librarian, set up a new Python virtual environment.
+Before developing learn-astropy-librarian, set up a new Python virtual environment.
 Then, install the application with development dependencies::
 
     pip install -e ".[dev]"
