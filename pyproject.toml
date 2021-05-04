@@ -7,3 +7,25 @@ requires = [
 build-backend = 'setuptools.build_meta'
 
 [tools.setuptools_scm]
+
+[tool.black]
+line-length = 79
+target-version = ["py37"]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+include_trailing_comma = true
+multi_line_output = 3
+known_first_party = ["astropylibrarian", "tests"]
+skip = ["docs/conf.py"]
