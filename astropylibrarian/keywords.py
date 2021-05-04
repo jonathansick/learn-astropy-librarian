@@ -2,7 +2,7 @@
 """Standardized Learn Astropy keywords."""
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence, Union
 
 import yaml
 
@@ -61,12 +61,14 @@ class KeywordDb:
         return cls(**keyword_groups)
 
     @staticmethod
-    def _load_keyword_table(group) -> KeywordTable:
-        keywords = {}
+    def _load_keyword_table(
+            group: Sequence[Union[str, Dict[str, Sequence[str]]]]
+    ) -> KeywordTable:
+        keywords: KeywordTable = {}
         for keyword_item in group:
             if isinstance(keyword_item, dict):
                 keyword = list(keyword_item.keys())[0]
-                alternatives = keyword_item[keyword]
+                alternatives = list(keyword_item[keyword])
             elif isinstance(keyword_item, str):
                 keyword = keyword_item
                 alternatives = list()
