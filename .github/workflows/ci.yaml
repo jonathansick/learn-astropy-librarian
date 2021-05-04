@@ -1,8 +1,56 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
 
 jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v2.0.3
+
+  typing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Python install
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+
+      - name: Cache tox environments
+        id: cache-tox
+        uses: actions/cache@v2
+        with:
+          path: .tox
+          key: tox-typing-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('tox.ini') }}
+
+      - name: Run mypy
+        run: tox -e typing
 
   test:
     runs-on: ubuntu-latest
@@ -12,6 +60,7 @@ jobs:
         python-version:
           - 3.7
           - 3.8
+          - 3.9
 
     steps:
       - uses: actions/checkout@v2
@@ -19,14 +68,21 @@ jobs:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Python install
         run: |
           python -m pip install --upgrade pip
-          pip install .[dev]
+          pip install tox
 
-      - name: Run pytest
-        run: pytest
+      - name: Cache tox environments
+        id: cache-tox
+        uses: actions/cache@v2
+        with:
+          path: .tox
+          key: tox-${{ matrix.python-version }}-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('tox.ini') }}
+
+      - name: Run unit tests
+        run: tox -e py

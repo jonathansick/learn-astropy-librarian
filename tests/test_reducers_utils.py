@@ -2,12 +2,18 @@
 """Tests for the astropylibrarian.reducers.utils module.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import lxml.html
 
 from astropylibrarian.reducers.utils import iter_sphinx_sections
 
+if TYPE_CHECKING:
+    from .conftest import TestHtml
 
-def test_iter_sphinx_sections(color_excess_tutorial):
+
+def test_iter_sphinx_sections(color_excess_tutorial: TestHtml) -> None:
     """Test the iter_sphinx_sections algorithm using the color-excess.html
     notebook tutorial example.
 

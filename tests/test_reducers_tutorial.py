@@ -2,10 +2,17 @@
 """Tests for the astropylibrarian.reducers.tutorial module.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
+if TYPE_CHECKING:
+    from .conftest import TestHtml
 
-def test_color_excess(color_excess_tutorial):
+
+def test_color_excess(color_excess_tutorial: TestHtml) -> None:
     """Test with the "color-excess.html" dataset.
     """
     reduced_tutorial = ReducedTutorial(
@@ -85,9 +92,10 @@ def test_color_excess(color_excess_tutorial):
     ]
 
 
-def test_coordinates_transform(coordinates_transform_tutorial):
-    """Test with the "Coordinates_Transform.html" dataset.
-    """
+def test_coordinates_transform(
+        coordinates_transform_tutorial: TestHtml
+) -> None:
+    """Test with the "Coordinates_Transform.html" dataset."""
     reduced_tutorial = ReducedTutorial(
         html_source=coordinates_transform_tutorial.html,
         url=coordinates_transform_tutorial.url)
