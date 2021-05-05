@@ -33,7 +33,7 @@ class KeywordDb:
         self._keyword_groups = kwargs
 
     @classmethod
-    def load(cls, path: Optional[Path] = None) -> 'KeywordDb':
+    def load(cls, path: Optional[Path] = None) -> "KeywordDb":
         """Load a KeywordDB from a YAML file.
 
         Parameters
@@ -48,7 +48,7 @@ class KeywordDb:
             A keyword database instance.
         """
         if path is None:
-            path = Path(__file__).parent / 'data' / 'keywords.yaml'
+            path = Path(__file__).parent / "data" / "keywords.yaml"
 
         db = yaml.safe_load(path.read_text())
 
@@ -62,7 +62,7 @@ class KeywordDb:
 
     @staticmethod
     def _load_keyword_table(
-            group: Sequence[Union[str, Dict[str, Sequence[str]]]]
+        group: Sequence[Union[str, Dict[str, Sequence[str]]]]
     ) -> KeywordTable:
         keywords: KeywordTable = {}
         for keyword_item in group:
@@ -76,9 +76,7 @@ class KeywordDb:
         return keywords
 
     def filter_keywords(
-            self,
-            input_keywords: List[str],
-            keyword_group: str
+        self, input_keywords: List[str], keyword_group: str
     ) -> List[str]:
         """Filter keywords for a specific group.
 
@@ -101,8 +99,8 @@ class KeywordDb:
             table = self._keyword_groups[keyword_group]
         except KeyError:
             raise ValueError(
-                f'Keyword group {keyword_group} is unknown. Available groups '
-                f'are: {self._keyword_groups.keys()}.'
+                f"Keyword group {keyword_group} is unknown. Available groups "
+                f"are: {self._keyword_groups.keys()}."
             )
 
         # Normalize the input keywords
