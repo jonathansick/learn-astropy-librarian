@@ -2,17 +2,18 @@
 """Workflow for indexing a learn.astropy tutorial to Algolia.
 """
 
-__all__ = ['index_tutorial']
+__all__ = ["index_tutorial"]
 
-import json
 import asyncio
+import json
 import logging
 from typing import TYPE_CHECKING, List
 
 from algoliasearch.responses import MultipleResponse
 
-from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.algolia.records import TutorialSectionRecord
+from astropylibrarian.reducers.tutorial import ReducedTutorial
+
 from .download import download_html
 
 if TYPE_CHECKING:
@@ -24,11 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 async def index_tutorial(
-        *,
-        url: str,
-        http_client: 'aiohttp.ClientSession',
-        algolia_client: 'SearchClient',
-        index_name: str) -> List[str]:
+    *,
+    url: str,
+    http_client: "aiohttp.ClientSession",
+    algolia_client: "SearchClient",
+    index_name: str,
+) -> List[str]:
     """Asynchronously save records for a tutorial to Algolia (awaitable
     function).
 
@@ -63,15 +65,17 @@ async def index_tutorial(
        <https://www.algolia.com/doc/api-reference/api-methods/save-objects/>`_)
     """
     tutorial_html = await download_html(url=url, http_client=http_client)
-    logger.debug('Downloaded %s')
+    logger.debug("Downloaded %s")
 
     tutorial = ReducedTutorial(html_source=tutorial_html, url=url)
 
-    records = [TutorialSectionRecord(section=s, tutorial=tutorial)
-               for s in tutorial.sections]
+    records = [
+        TutorialSectionRecord(section=s, tutorial=tutorial)
+        for s in tutorial.sections
+    ]
 
     record_objects = [r.data for r in records]
-    logger.debug(f'Indexing {len(record_objects)} objects')
+    logger.debug(f"Indexing {len(record_objects)} objects")
 
     for r in record_objects:
         logger.debug(json.dumps(r, indent=2))

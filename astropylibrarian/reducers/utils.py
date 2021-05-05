@@ -2,10 +2,10 @@
 """Utilities for reducing HTML pages into search records.
 """
 
-__all__ = ('Section', 'iter_sphinx_sections')
+__all__ = ("Section", "iter_sphinx_sections")
 
 from dataclasses import dataclass
-from typing import Callable, List, Generator, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 if TYPE_CHECKING:
     import lxml.html
@@ -13,8 +13,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Section:
-    """A section of content.
-    """
+    """A section of content."""
 
     content: str
     """The plain-text content of the section.
@@ -39,16 +38,17 @@ class Section:
         return len(self.headings)
 
 
-_HEADING_TAGS = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
+_HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 
 
 def iter_sphinx_sections(
-        *, root_section: 'lxml.html.HtmlElement',
-        base_url: str,
-        headers: List[str],
-        header_callback: Optional[Callable[[str], str]] = None,
-        content_callback: Optional[Callable[[str], str]] = None,
-        ) -> Generator[Section, None, None]:
+    *,
+    root_section: "lxml.html.HtmlElement",
+    base_url: str,
+    headers: List[str],
+    header_callback: Optional[Callable[[str], str]] = None,
+    content_callback: Optional[Callable[[str], str]] = None,
+) -> Generator[Section, None, None]:
     """Iterate through the hierarchical sections in a root HTML element,
     yielding the content between that section header and the next section
     header.
@@ -80,8 +80,8 @@ def iter_sphinx_sections(
         Yields `Section` objects for each section segment. Sections are yielded
         depth-first. The top-level section is yielded last.
     """
-    id_ = root_section.attrib['id']
-    url = f'{base_url}#{id_}'
+    id_ = root_section.attrib["id"]
+    url = f"{base_url}#{id_}"
     text_elements: List[str] = []
     for element in root_section:
         if element.tag in _HEADING_TAGS:
@@ -89,13 +89,13 @@ def iter_sphinx_sections(
             if header_callback:
                 current_header = header_callback(current_header)
             current_headers = headers + [current_header]
-        elif element.tag == 'div' and 'section' in element.classes:
+        elif element.tag == "div" and "section" in element.classes:
             yield from iter_sphinx_sections(
                 root_section=element,
                 base_url=base_url,
                 headers=current_headers,
                 header_callback=header_callback,
-                content_callback=content_callback
+                content_callback=content_callback,
             )
         else:
             if content_callback:
@@ -104,6 +104,5 @@ def iter_sphinx_sections(
                 text_elements.append(element.text_content())
 
     yield Section(
-        content='\n\n'.join(text_elements),
-        headings=current_headers,
-        url=url)
+        content="\n\n".join(text_elements), headings=current_headers, url=url
+    )
