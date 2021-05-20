@@ -1,12 +1,20 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Tests for the astropylibrarian.workflows.indexjupyterbook module."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import pytest
 
-from astropylibrarian.workflows.indexjupyterbook import detect_redirect
+from astropylibrarian.workflows.indexjupyterbook import (
+    detect_redirect,
+    extract_page_urls,
+)
+
+if TYPE_CHECKING:
+    from conftest import TestHtml
 
 
 @pytest.mark.parametrize(
@@ -38,3 +46,13 @@ def test_detect_redirect(
 ) -> None:
     html = Path(__file__).parent.joinpath(html_path).read_text()
     assert expected == detect_redirect(html=html, url=base_url)
+
+
+def test_extract_page_urls(ccd_guide_00_00: TestHtml) -> None:
+    extracted = extract_page_urls(
+        html=ccd_guide_00_00.html, url=ccd_guide_00_00.url
+    )
+    assert (
+        "http://www.astropy.org/ccd-reduction-and-photometry-guide/notebooks/"
+        "01-00-Understanding-an-astronomical-CCD-image.html"
+    ) in extracted

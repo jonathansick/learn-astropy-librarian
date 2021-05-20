@@ -152,3 +152,26 @@ def parse_redirect_url(*, content: str, source_url: str) -> str:
         raise RuntimeError("No url match")
 
     return urljoin(source_url, redirect_path)
+
+
+def extract_page_urls(*, html: str, url: str) -> List[str]:
+    """Extract the page URLs form the ``<nav>`` element of a Jupyter Book page.
+
+    Parameters
+    ----------
+    html : `str`
+        The HTML content of the Jupyter Book page, usually the homepage.
+    url : `str`
+        The URL of the page hosting ``html``.
+
+    Returns
+    -------
+    list of str
+        List of page URLs, not including the homepage.
+    """
+    doc = lxml.html.document_fromstring(html)
+    return [
+        urljoin(url, link.attrib["href"])
+        for link in doc.cssselect("nav a.internal")
+        if link.attrib["href"] != "#"  # skip homepage
+    ]
