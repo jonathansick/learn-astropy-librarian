@@ -67,7 +67,7 @@ async def index_tutorial(
     tutorial_html = await download_html(url=url, http_client=http_client)
     logger.debug("Downloaded %s")
 
-    tutorial = ReducedTutorial(html_source=tutorial_html, url=url)
+    tutorial = ReducedTutorial(html_page=tutorial_html)
 
     records = [
         TutorialSectionRecord(section=s, tutorial=tutorial)

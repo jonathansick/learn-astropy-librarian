@@ -1,102 +1,80 @@
-"""Pytest configurations.
-"""
+"""Pytest configurations."""
 
-from dataclasses import dataclass
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
 
+from astropylibrarian.resources import HtmlPage
 
-@dataclass
-class TestHtml:
+
+class HtmlTestData(HtmlPage):
     """A container for HTML pages cached in the repo's tests/data directory."""
 
-    html: str
-    """HTML content."""
-
-    url: str
-    """URL of the HTML content (in the real deployment)."""
+    @classmethod
+    def from_path(cls, *, path: str, url: str) -> HtmlTestData:
+        data_path = Path(__file__).parent / "data"
+        source_path = data_path.joinpath(path)
+        html = source_path.read_text()
+        return cls(html=html, url=url)
 
 
 @pytest.fixture(scope="session")
-def color_excess_tutorial() -> TestHtml:
+def color_excess_tutorial() -> HtmlTestData:
     """The color-excess.html tutorial page."""
-    source_path = (
-        Path(__file__).parent / "data" / "tutorials" / "color-excess.html"
-    )
-    return TestHtml(
-        html=source_path.read_text(),
+    return HtmlTestData.from_path(
+        path="tutorials/color-excess.html",
         url="http://learn.astropy.org/rst-tutorials/color-excess.html",
     )
 
 
 @pytest.fixture(scope="session")
-def coordinates_transform_tutorial() -> TestHtml:
+def coordinates_transform_tutorial() -> HtmlTestData:
     """The Coordinates-Transform.html tutorial page."""
-    source_path = (
-        Path(__file__).parent
-        / "data"
-        / "tutorials"
-        / "Coordinates-Transform.html"
-    )
-    return TestHtml(
-        html=source_path.read_text(),
+    return HtmlTestData.from_path(
+        path="tutorials/Coordinates-Transform.html",
         url="http://learn.astropy.org/rst-tutorials/"
         "Coordinates-Transform.html",
     )
 
 
 @pytest.fixture(scope="session")
-def ccd_guide_index() -> TestHtml:
+def ccd_guide_index() -> HtmlTestData:
     """The ``ccd-guide/index.html`` page.
 
     This page is the root file created by Jupyter Book, but which redirects
     to the first content page (notebooks/00-00-Preface.html).
     """
-    source_path = Path(__file__).parent / "data" / "ccd-guide" / "index.html"
-    return TestHtml(
-        html=source_path.read_text(),
+    return HtmlTestData.from_path(
+        path="ccd-guide/index.html",
         url="http://www.astropy.org/ccd-reduction-and-photometry-guide/"
         "index.html",
     )
 
 
 @pytest.fixture(scope="session")
-def ccd_guide_00_00() -> TestHtml:
+def ccd_guide_00_00() -> HtmlTestData:
     """The ``ccd-guide/notebooks/00-00-Preface.html`` page.
 
     This is the CCD Guide homepage created by Jupyter Book.
     """
-    source_path = (
-        Path(__file__).parent
-        / "data"
-        / "ccd-guide"
-        / "notebooks"
-        / "00-00-Preface.html"
-    )
-    return TestHtml(
-        html=source_path.read_text(),
+    return HtmlTestData.from_path(
+        path="ccd-guide/notebooks/00-00-Preface.html",
         url="http://www.astropy.org/ccd-reduction-and-photometry-guide/"
         "notebooks/00-00-Preface.html",
     )
 
 
 @pytest.fixture(scope="session")
-def ccd_guide_01_05() -> TestHtml:
+def ccd_guide_01_05() -> HtmlTestData:
     """The ``ccd-guide/notebooks/01-05-Calibration-overview.html`` page.
 
     This is a regular content page from the CCD Guide homepage created by
     Jupyter Book.
     """
-    source_path = (
-        Path(__file__).parent
-        / "data"
-        / "ccd-guide"
-        / "notebooks"
-        / "01-05-Calibration-overview.html"
-    )
-    return TestHtml(
-        html=source_path.read_text(),
+    return HtmlTestData.from_path(
+        path="ccd-guide/notebooks/01-05-Calibration-overview.html",
         url="http://www.astropy.org/ccd-reduction-and-photometry-guide/"
         "notebooks/01-05-Calibration-overview.html",
     )

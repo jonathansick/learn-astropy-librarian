@@ -9,14 +9,12 @@ from typing import TYPE_CHECKING
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
 if TYPE_CHECKING:
-    from .conftest import TestHtml
+    from .conftest import HtmlTestData
 
 
-def test_color_excess(color_excess_tutorial: TestHtml) -> None:
+def test_color_excess(color_excess_tutorial: HtmlTestData) -> None:
     """Test with the "color-excess.html" dataset."""
-    reduced_tutorial = ReducedTutorial(
-        html_source=color_excess_tutorial.html, url=color_excess_tutorial.url
-    )
+    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
 
     assert reduced_tutorial.url == color_excess_tutorial.url
     assert reduced_tutorial.h1 == (
@@ -92,12 +90,11 @@ def test_color_excess(color_excess_tutorial: TestHtml) -> None:
 
 
 def test_coordinates_transform(
-    coordinates_transform_tutorial: TestHtml,
+    coordinates_transform_tutorial: HtmlTestData,
 ) -> None:
     """Test with the "Coordinates_Transform.html" dataset."""
     reduced_tutorial = ReducedTutorial(
-        html_source=coordinates_transform_tutorial.html,
-        url=coordinates_transform_tutorial.url,
+        html_page=coordinates_transform_tutorial
     )
 
     assert reduced_tutorial.url == coordinates_transform_tutorial.url

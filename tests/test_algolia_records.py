@@ -11,13 +11,11 @@ from astropylibrarian.algolia.records import TutorialSectionRecord
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 
 if TYPE_CHECKING:
-    from .conftest import TestHtml
+    from .conftest import HtmlTestData
 
 
-def test_tutorialsectionrecord(color_excess_tutorial: TestHtml) -> None:
-    reduced_tutorial = ReducedTutorial(
-        html_source=color_excess_tutorial.html, url=color_excess_tutorial.url
-    )
+def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
+    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
 
     record = TutorialSectionRecord(
         section=reduced_tutorial.sections[0], tutorial=reduced_tutorial

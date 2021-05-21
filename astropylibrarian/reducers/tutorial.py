@@ -3,14 +3,19 @@
 into search records.
 """
 
+from __future__ import annotations
+
 __all__ = ("ReducedTutorial",)
 
-from typing import List
+from typing import TYPE_CHECKING, List
 from urllib.parse import urljoin
 
-import lxml.html
+from astropylibrarian.reducers.utils import Section, iter_sphinx_sections
 
-from .utils import Section, iter_sphinx_sections
+if TYPE_CHECKING:
+    import lxml.html
+
+    from astropylibrarian.resources import HtmlPage
 
 
 class ReducedTutorial:
@@ -19,10 +24,8 @@ class ReducedTutorial:
 
     Parameters
     ----------
-    html_source : str
-        The HTML source of the tutorial page.
-    url : str
-        The canonical URL of the tutorial page.
+    html_page : `astropylibrarian.resources.HtmlPage`
+        The downloaded HTML page.
     """
 
     @property
@@ -62,8 +65,8 @@ class ReducedTutorial:
         """
         return self._sections
 
-    def __init__(self, *, html_source: str, url: str) -> None:
-        self._url = url
+    def __init__(self, *, html_page: HtmlPage) -> None:
+        self._url = html_page.url
         self._h1: str = ""
         self._authors: List[str] = []
         self._keywords: List[str] = []
@@ -75,13 +78,13 @@ class ReducedTutorial:
         # they're part of the metadata.
         self.ignored_headings = set(["authors", "keywords", "summary"])
 
-        self._process_html(html_source)
+        self._process_html(html_page)
 
         self._set_summary_on_h1_section()
 
-    def _process_html(self, html_source: str) -> None:
-        """ """
-        doc = lxml.html.document_fromstring(html_source)
+    def _process_html(self, html_page: HtmlPage) -> None:
+        """Process the HTML page."""
+        doc = html_page.parse()
 
         try:
             self._h1 = self._get_section_title(doc.cssselect("h1")[0])

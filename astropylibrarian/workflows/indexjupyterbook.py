@@ -5,19 +5,21 @@ This workflow ingests the Jupyter Book homepage and triggers workflows to
 ingest individual Jupyter Book content pages.
 """
 
+from __future__ import annotations
+
 __all__ = ["index_jupyterbook"]
 
 import re
 from typing import TYPE_CHECKING, List, Union
 from urllib.parse import urljoin
 
-import lxml.html
-
 from astropylibrarian.workflows.download import download_html
 
 if TYPE_CHECKING:
     import aiohttp
     from algoliasearch.search_client import SearchClient
+
+    from astropylibrarian.resources import HtmlPage
 
 
 async def index_jupyterbook(
@@ -54,7 +56,7 @@ async def index_jupyterbook(
 
 async def download_homepage(
     *, url: str, http_client: "aiohttp.ClientSession"
-) -> str:
+) -> HtmlPage:
     """Download the HTML for the Jupyter Book's homepage, given the root
     URL
 
@@ -70,33 +72,32 @@ async def download_homepage(
 
     Returns
     -------
-    str
-        The HTML content of the homepage.
+    astropylibrarian.resources.HtmlPage
+        The HTML page.
     """
     index_page = await download_html(url=url, http_client=http_client)
 
     try:
         # Detect if the URL is a redirect to the true first content page
-        redirect_url = detect_redirect(html=index_page, url=url)
+        redirect_url = detect_redirect(index_page)
         if isinstance(redirect_url, str):
-            url = redirect_url
+            return await download_html(
+                url=redirect_url, http_client=http_client
+            )
     except Exception:
         pass
 
-    html = await download_html(url=url, http_client=http_client)
-    return html
+    return index_page
 
 
-def detect_redirect(*, html: str, url: str) -> Union[None, str]:
+def detect_redirect(html_page: HtmlPage) -> Union[None, str]:
     """Detect if the page is actually an immediate redirect to another page
     via an "http-equiv=Refresh" meta tag.
 
     Parameters
     ----------
-    html : `str`
-        The HTML content of the page.
-    url : `str`
-        The URL of the page.
+    html_page : `astropylibrarian.resources.HtmlPage`
+        The HTML page.
 
     Returns
     -------
@@ -104,13 +105,13 @@ def detect_redirect(*, html: str, url: str) -> Union[None, str]:
         Returns `None` if the page is not a redirect. If the page *is* a,
         redirect, returns the URL of the target page.
     """
-    doc = lxml.html.document_fromstring(html)
+    doc = html_page.parse()
     # Now try to see if there is a <meta> tag with http-equiv="Refresh"
     for element in doc.cssselect("meta"):
         try:
             if element.attrib["http-equiv"].lower() == "refresh":
                 return parse_redirect_url(
-                    content=element.attrib["content"], source_url=url
+                    content=element.attrib["content"], source_url=html_page.url
                 )
         except (KeyError, RuntimeError):
             continue
@@ -154,24 +155,22 @@ def parse_redirect_url(*, content: str, source_url: str) -> str:
     return urljoin(source_url, redirect_path)
 
 
-def extract_page_urls(*, html: str, url: str) -> List[str]:
+def extract_page_urls(*, html_page: HtmlPage) -> List[str]:
     """Extract the page URLs form the ``<nav>`` element of a Jupyter Book page.
 
     Parameters
     ----------
-    html : `str`
-        The HTML content of the Jupyter Book page, usually the homepage.
-    url : `str`
-        The URL of the page hosting ``html``.
+    html_page : `astropylibrarian.resources.HtmlPage`
+        The HTML page.
 
     Returns
     -------
     list of str
         List of page URLs, not including the homepage.
     """
-    doc = lxml.html.document_fromstring(html)
+    doc = html_page.parse()
     return [
-        urljoin(url, link.attrib["href"])
+        urljoin(html_page.url, link.attrib["href"])
         for link in doc.cssselect("nav a.internal")
         if link.attrib["href"] != "#"  # skip homepage
     ]
