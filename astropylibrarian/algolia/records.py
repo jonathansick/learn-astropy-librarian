@@ -7,14 +7,97 @@ __all__ = ["TutorialSectionRecord"]
 import datetime
 from base64 import b64encode
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List
+from enum import Enum
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
+
+from pydantic import BaseModel, Field, HttpUrl
 
 from astropylibrarian.keywords import KeywordDb
 
 if TYPE_CHECKING:
     from astropylibrarian.reducers.tutorial import ReducedTutorial
     from astropylibrarian.reducers.utils import Section
+
+
+class ContentType(str, Enum):
+    """Learn Astropy content types."""
+
+    tutorial = "tutorial"
+
+    guide = "guide"
+
+    example = "example"
+
+    documentation = "documentation"
+
+
+class AlgoliaRecord(BaseModel):
+    """A Pydantic model for an Learn Astropy record in Algolia."""
+
+    object_id: str = Field(
+        alias="objectID", description="Unique identifier for this record."
+    )
+
+    content_type: ContentType = Field(
+        alias="contentType", description="Content type."
+    )
+
+    root_url: HttpUrl = Field(
+        alias="rootUrl",
+        description=(
+            "URL of the document project's root page. For multi-page sites "
+            "this corresponds to the site's homepage. For single-page sites "
+            "this corresponds to the page's URL and is the same as "
+            "``baseUrl``."
+        ),
+    )
+
+    root_title: str = Field(
+        alias="rootTitle",
+        description=(
+            "Title of the documentation project. For single-page sites "
+            "This is the same as ``h1``."
+        ),
+    )
+
+    base_url: HttpUrl = Field(
+        alias="baseUrl",
+        description=(
+            "The base URL of the page, without fragments, parameters, "
+            "queries, etc."
+        ),
+    )
+
+    h1: str = Field(description="The title.")
+
+    h2: Optional[str] = Field(description="The second-level heading.")
+
+    h3: Optional[str] = Field(description="The third-level heading.")
+
+    h4: Optional[str] = Field(description="The fourth-level heading.")
+
+    h5: Optional[str] = Field(description="The fifth-level heading.")
+
+    h6: Optional[str] = Field(description="The sixth-level heading.")
+
+    importance: int = Field(
+        description="The importance of the record, corresponding to the "
+        "hierarchical section level"
+    )
+
+    content: str = Field(description="The plain text content of the record.")
+
+    date_indexed: datetime.datetime = Field(
+        alias="dateIndexed",
+        description="Timestamp when the record was indexed.",
+        default_factory=datetime.datetime.utcnow,
+    )
+
+    thumbnail_url: Optional[HttpUrl] = Field(
+        alias="thumbnailUrl",
+        description="URL of an image to use as a thumbnail.",
+    )
 
 
 @dataclass
