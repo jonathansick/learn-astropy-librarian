@@ -11,7 +11,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, validator
 
 from astropylibrarian.keywords import KeywordDb
 
@@ -98,6 +98,38 @@ class AlgoliaRecord(BaseModel):
         alias="thumbnailUrl",
         description="URL of an image to use as a thumbnail.",
     )
+
+
+class TutorialRecord(AlgoliaRecord):
+    """A Pydantic model for a "tutorial" content type record."""
+
+    authors: Optional[List[str]] = Field(description="List of author names.")
+
+    astropy_package_keywords: Optional[List[str]] = Field(
+        alias="astropyPackageKeywords",
+        description="List of astropy package keywords.",
+    )
+
+    python_package_keywords: Optional[List[str]] = Field(
+        alias="pythonPackageKeywords",
+        description="List of python package keywords.",
+    )
+
+    task_keywords: Optional[List[str]] = Field(
+        alias="taskKeywords", description="List of task keywords."
+    )
+
+    science_keywords: Optional[List[str]] = Field(
+        alias="scienceKeywords", description="List of science keywords."
+    )
+
+    @validator("content_type")
+    def validate_content_type(cls, v: Optional[str]) -> str:
+        if v is None:
+            return ContentType.tutorial
+        elif v != ContentType.tutorial:
+            raise ValueError("Content type must be `tutorial`.")
+        return v
 
 
 @dataclass
