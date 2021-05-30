@@ -9,7 +9,7 @@ import pytest
 
 from astropylibrarian.workflows.indexjupyterbook import (
     detect_redirect,
-    extract_page_urls,
+    extract_homepage_metadata,
 )
 
 from .conftest import HtmlTestData
@@ -46,9 +46,30 @@ def test_detect_redirect(
     assert expected == detect_redirect(html_page)
 
 
-def test_extract_page_urls(ccd_guide_00_00: HtmlTestData) -> None:
-    extracted = extract_page_urls(html_page=ccd_guide_00_00)
+def test_extract_homepage_metadata(ccd_guide_00_00: HtmlTestData) -> None:
+    """Test the extract_homepage_metadata function."""
+    md = extract_homepage_metadata(
+        html_page=ccd_guide_00_00,
+        root_url="http://www.astropy.org/ccd-reduction-and-photometry-guide/",
+    )
+    assert md.title == "CCD Data Reduction Guide"
+    assert md.logo_url == (
+        "http://www.astropy.org/ccd-reduction-and-photometry-guide/"
+        "_static/logo.png"
+    )
+    assert md.description == (
+        "The purpose of this text is to walk through image reduction and "
+        "photometry using Python, especially Astropy and its affiliated "
+        "packages. It assumes some basic familiarity with astronomical images "
+        "and with Python. The inspiration for this work is a pair of guides "
+        "written for IRAF, “A User’s Guide to CCD Reductions with IRAF” "
+        "(Massey 1997) and “A User’s Guide to Stellar CCD Photometry with "
+        "IRAF” (Massey and Davis 1992)."
+    )
+    assert md.source_repository == (
+        "https://github.com/mwcraig/ccd-reduction-and-photometry-guide"
+    )
     assert (
         "http://www.astropy.org/ccd-reduction-and-photometry-guide/notebooks/"
         "01-00-Understanding-an-astronomical-CCD-image.html"
-    ) in extracted
+    ) in md.page_urls
