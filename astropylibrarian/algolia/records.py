@@ -1,21 +1,20 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Record types that reflect Algolia search records.
-"""
+"""Record types that reflect Algolia search records."""
 
-__all__ = ["TutorialSectionRecord"]
+from __future__ import annotations
+
+__all__ = ["ContentType", "AlgoliaRecord", "TutorialRecord"]
 
 import datetime
 from base64 import b64encode
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
 
 from pydantic import BaseModel, Field, HttpUrl, validator
 
-from astropylibrarian.keywords import KeywordDb
-
 if TYPE_CHECKING:
+    from astropylibrarian.keywords import KeywordDb
     from astropylibrarian.reducers.tutorial import ReducedTutorial
     from astropylibrarian.reducers.utils import Section
 
@@ -131,95 +130,89 @@ class TutorialRecord(AlgoliaRecord):
             raise ValueError("Content type must be `tutorial`.")
         return v
 
+    @classmethod
+    def from_section(
+        cls,
+        *,
+        tutorial: ReducedTutorial,
+        section: Section,
+        keyworddb: KeywordDb,
+    ) -> TutorialRecord:
+        """Create a TutorialRecord from a reduced tutorial HTML page and
+        specific section.
 
-@dataclass
-class TutorialSectionRecord:
-    """An Algolia record for learn.astropy tutorial sections."""
+        Parameters
+        ----------
+        tutorial : astropylibrarian.reducers.tutorial.ReducedTutorial
+            The tutorial.
+        section : astropylibrarian.reducers.utils.Section
+            A section of the tutorial, which corresponds 1:1 with an Algolia
+            record.
+        keyworddb : astropylibrarian.keywords.KeywordDb
+            The keyword database to sort keywords in tutorials into
+            categories for the Learn Astropy UI.
 
-    section: "Section"
-    """The underlying Section content of the record
-    (`astropylibrarian.reducers.utils.Section`).
-    """
+        Returns
+        -------
+        TutorialRecord
+            A tutorial record, ready to index in Algolia.
+        """
+        base_url = cls.compute_base_url(tutorial=tutorial)
+        kwargs: Dict[str, Any] = {
+            "object_id": cls.compute_object_id(
+                tutorial=tutorial, section=section
+            ),
+            "url": section.url,
+            "root_url": base_url,
+            "root_title": tutorial.h1,
+            "base_url": base_url,
+            "importance": section.header_level,
+            "content": section.content,
+            "authors": tutorial.authors,
+            "astropy_package_keywords": keyworddb.filter_keywords(
+                tutorial.keywords, "astropy_package"
+            ),
+            "python_package_keywords": keyworddb.filter_keywords(
+                tutorial.keywords, "python_package"
+            ),
+            "task_keywords": keyworddb.filter_keywords(
+                tutorial.keywords, "task"
+            ),
+            "science_keywords": keyworddb.filter_keywords(
+                tutorial.keywords, "science"
+            ),
+        }
+        for i, heading in enumerate(section.headings):
+            kwargs[f"h{i+1}"] = heading
+        if tutorial.images:
+            kwargs["thumbnail_url"] = tutorial.images[0]
 
-    tutorial: "ReducedTutorial"
-    """The reduced tutorial page that this record is associated with
-    (`astropylibrarian.reducers.tutorial.ReducedTutorial`).
-    """
+        return cls(**kwargs)
 
-    keyworddb: KeywordDb = field(default_factory=KeywordDb.load)
-    """Keyword database."""
-
-    @property
-    def object_id(self) -> str:
-        """The objectID of the record.
+    @staticmethod
+    def compute_object_id(
+        *, tutorial: ReducedTutorial, section: Section
+    ) -> str:
+        """Compute the objectID of the record.
 
         This is computed based on the URL and section heading hierarchy.
         """
-        url_component = b64encode(
-            self.section.url.lower().encode("utf-8")
-        ).decode("utf-8")
+        url_component = b64encode(section.url.lower().encode("utf-8")).decode(
+            "utf-8"
+        )
         heading_component = b64encode(
-            " ".join(self.section.headings).encode("utf-8")
+            " ".join(section.headings).encode("utf-8")
         ).decode("utf-8")
         return f"{url_component}-{heading_component}"
 
-    @property
-    def base_url(self) -> str:
+    @staticmethod
+    def compute_base_url(*, tutorial: ReducedTutorial) -> str:
         """The base URL of the tutorial that the section belongs to.
 
         This is the section's ``url`` attribute stripped of the fragment
         (``#id`` part).
         """
-        url_parts = urlparse(self.section.url)
+        url_parts = urlparse(tutorial.url)
         return urlunparse(
             (url_parts.scheme, url_parts.netloc, url_parts.path, "", "", "")
         )
-
-    @property
-    def astropy_package_keywords(self) -> List[str]:
-        """The list of "Astropy package" keywords."""
-        return self.keyworddb.filter_keywords(
-            self.tutorial.keywords, "astropy_package"
-        )
-
-    @property
-    def python_package_keywords(self) -> List[str]:
-        """The list of "Python package" keywords."""
-        return self.keyworddb.filter_keywords(
-            self.tutorial.keywords, "python_package"
-        )
-
-    @property
-    def task_keywords(self) -> List[str]:
-        """The list of "task" keywords."""
-        return self.keyworddb.filter_keywords(self.tutorial.keywords, "task")
-
-    @property
-    def science_keywords(self) -> List[str]:
-        """The list of "science" keywords."""
-        return self.keyworddb.filter_keywords(
-            self.tutorial.keywords, "science"
-        )
-
-    @property
-    def data(self) -> Dict[str, Any]:
-        """The JSON-encodable record, ready for indexing by Algolia."""
-        record = {
-            "objectID": self.object_id,
-            "baseUrl": self.base_url,
-            "url": self.section.url,
-            "content": self.section.content,
-            "importance": self.section.header_level,
-            "contentType": "tutorial",
-            "authors": self.tutorial.authors,
-            "astropy_package_keywords": self.astropy_package_keywords,
-            "python_package_keywords": self.python_package_keywords,
-            "task_keywords": self.task_keywords,
-            "science_keywords": self.science_keywords,
-            "dateIndexed": f"{datetime.datetime.now().isoformat()}Z",
-        }
-        for i, heading in enumerate(self.section.headings):
-            record[f"h{i+1}"] = heading
-        if self.tutorial.images:
-            record["thumbnail"] = self.tutorial.images[0]
-        return record

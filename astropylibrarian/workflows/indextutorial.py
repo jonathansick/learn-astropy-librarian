@@ -5,16 +5,13 @@
 __all__ = ["index_tutorial"]
 
 import asyncio
-import json
 import logging
 from typing import TYPE_CHECKING, List
 
 from algoliasearch.responses import MultipleResponse
 
-from astropylibrarian.algolia.records import TutorialSectionRecord
 from astropylibrarian.reducers.tutorial import ReducedTutorial
-
-from .download import download_html
+from astropylibrarian.workflows.download import download_html
 
 if TYPE_CHECKING:
     import aiohttp
@@ -69,19 +66,13 @@ async def index_tutorial(
 
     tutorial = ReducedTutorial(html_page=tutorial_html)
 
-    records = [
-        TutorialSectionRecord(section=s, tutorial=tutorial)
-        for s in tutorial.sections
-    ]
-
-    record_objects = [r.data for r in records]
-    logger.debug(f"Indexing {len(record_objects)} objects")
-
-    for r in record_objects:
-        logger.debug(json.dumps(r, indent=2))
+    records = [r for r in tutorial.iter_records()]
+    logger.debug(f"Indexing {len(records)} records")
 
     index = algolia_client.init_index(index_name)
-    tasks = [index.save_object_async(d) for d in record_objects]
+    tasks = [
+        index.save_object_async(r.dict(exclude_none=True)) for r in records
+    ]
 
     results = await asyncio.gather(*tasks)
     MultipleResponse(results).wait()

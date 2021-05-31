@@ -7,9 +7,11 @@ from __future__ import annotations
 
 __all__ = ("ReducedTutorial",)
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterator, List
 from urllib.parse import urljoin
 
+from astropylibrarian.algolia.records import TutorialRecord
+from astropylibrarian.keywords import KeywordDb
 from astropylibrarian.reducers.utils import Section, iter_sphinx_sections
 
 if TYPE_CHECKING:
@@ -159,6 +161,14 @@ class ReducedTutorial:
             return True
         else:
             return False
+
+    def iter_records(self) -> Iterator[TutorialRecord]:
+        """Iterate over Algolia records in the tutorial."""
+        keyworddb = KeywordDb.load()
+        for section in self.sections:
+            yield TutorialRecord.from_section(
+                tutorial=self, section=section, keyworddb=keyworddb
+            )
 
     def _set_summary_on_h1_section(self) -> None:
         """Replaces the content of the "h1" section, which should be empty,
