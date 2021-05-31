@@ -35,16 +35,18 @@ class ContentType(str, Enum):
 class AlgoliaRecord(BaseModel):
     """A Pydantic model for an Learn Astropy record in Algolia."""
 
-    object_id: str = Field(
-        alias="objectID", description="Unique identifier for this record."
-    )
+    object_id: str = Field(description="Unique identifier for this record.")
 
-    content_type: ContentType = Field(
-        alias="contentType", description="Content type."
+    content_type: ContentType = Field(description="Content type.")
+
+    url: HttpUrl = Field(
+        description=(
+            "The most-specific URL for this record. Compared to the base url "
+            "this URL may contain things like fragments in the URL."
+        ),
     )
 
     root_url: HttpUrl = Field(
-        alias="rootUrl",
         description=(
             "URL of the document project's root page. For multi-page sites "
             "this corresponds to the site's homepage. For single-page sites "
@@ -54,7 +56,6 @@ class AlgoliaRecord(BaseModel):
     )
 
     root_title: str = Field(
-        alias="rootTitle",
         description=(
             "Title of the documentation project. For single-page sites "
             "This is the same as ``h1``."
@@ -62,7 +63,6 @@ class AlgoliaRecord(BaseModel):
     )
 
     base_url: HttpUrl = Field(
-        alias="baseUrl",
         description=(
             "The base URL of the page, without fragments, parameters, "
             "queries, etc."
@@ -89,13 +89,11 @@ class AlgoliaRecord(BaseModel):
     content: str = Field(description="The plain text content of the record.")
 
     date_indexed: datetime.datetime = Field(
-        alias="dateIndexed",
         description="Timestamp when the record was indexed.",
         default_factory=datetime.datetime.utcnow,
     )
 
     thumbnail_url: Optional[HttpUrl] = Field(
-        alias="thumbnailUrl",
         description="URL of an image to use as a thumbnail.",
     )
 
@@ -106,21 +104,23 @@ class TutorialRecord(AlgoliaRecord):
     authors: Optional[List[str]] = Field(description="List of author names.")
 
     astropy_package_keywords: Optional[List[str]] = Field(
-        alias="astropyPackageKeywords",
         description="List of astropy package keywords.",
     )
 
     python_package_keywords: Optional[List[str]] = Field(
-        alias="pythonPackageKeywords",
         description="List of python package keywords.",
     )
 
     task_keywords: Optional[List[str]] = Field(
-        alias="taskKeywords", description="List of task keywords."
+        description="List of task keywords."
     )
 
     science_keywords: Optional[List[str]] = Field(
-        alias="scienceKeywords", description="List of science keywords."
+        description="List of science keywords."
+    )
+
+    content_type: ContentType = Field(
+        description="Content type.", default=ContentType.tutorial
     )
 
     @validator("content_type")
