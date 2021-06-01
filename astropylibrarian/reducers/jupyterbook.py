@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Iterator, List, Optional
 from urllib.parse import urljoin, urlparse, urlunparse
 
 from pydantic import BaseModel, HttpUrl, validator
 
+from astropylibrarian.reducers.utils import iter_sphinx_sections
+
 if TYPE_CHECKING:
     import lxml.html
 
+    from astropylibrarian.reducers.utils import Section
     from astropylibrarian.resources import HtmlPage
 
 
@@ -74,6 +77,25 @@ class JupyterBookPage:
             for link in self.doc.cssselect("nav a.internal")
             if link.attrib["href"] != "#"  # skip homepage
         ]
+
+    def iter_sections(self) -> Iterator[Section]:
+        """Iterate through sections in the page.
+
+        Yields
+        ------
+        astropylibrarian.reducers.utils.Section
+            A section of the document, which includes its content, heading
+            hierarchy and anchor link.
+        """
+        root = self.doc.cssselect("#main-content .section")[0]
+        for section in iter_sphinx_sections(
+            root_section=root,
+            base_url=self.html_page.url,
+            headers=[],
+            header_callback=lambda x: x.rstrip("¶"),
+            content_callback=self._clean_content,
+        ):
+            yield section
 
     @staticmethod
     def _clean_content(x: str) -> str:
