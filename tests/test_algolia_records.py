@@ -38,6 +38,7 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
         "object_id": record.object_id,
         "root_url": color_excess_tutorial.url,
         "root_title": reduced_tutorial.h1,
+        "root_summary": reduced_tutorial.summary,
         "base_url": color_excess_tutorial.url,
         "url": f"{color_excess_tutorial.url}#learning-goals",
         "content": (

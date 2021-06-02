@@ -36,6 +36,12 @@ class AlgoliaRecord(BaseModel):
 
     object_id: str = Field(description="Unique identifier for this record.")
 
+    root_summary: Optional[str] = Field(
+        description=(
+            "Short summary of the content corresponding to the root_url."
+        )
+    )
+
     content_type: ContentType = Field(description="Content type.")
 
     url: HttpUrl = Field(
@@ -185,6 +191,7 @@ class TutorialRecord(AlgoliaRecord):
             "url": section.url,
             "root_url": base_url,
             "root_title": tutorial.h1,
+            "root_summary": tutorial.summary,
             "base_url": base_url,
             "importance": section.header_level,
             "content": section.content,
