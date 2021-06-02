@@ -96,6 +96,28 @@ class AlgoliaRecord(BaseModel):
         description="URL of an image to use as a thumbnail.",
     )
 
+    @staticmethod
+    def compute_object_id_for_section(section: Section) -> str:
+        """Compute an Algolia object ID given a content section.
+
+        Parameters
+        ----------
+        section : `astropylibrarian.reducers.utils.Section`
+            A content section.
+
+        Returns
+        -------
+        str
+            The object ID for an Algolia record.
+        """
+        url_component = b64encode(section.url.lower().encode("utf-8")).decode(
+            "utf-8"
+        )
+        heading_component = b64encode(
+            " ".join(section.headings).encode("utf-8")
+        ).decode("utf-8")
+        return f"{url_component}-{heading_component}"
+
 
 class TutorialRecord(AlgoliaRecord):
     """A Pydantic model for a "tutorial" content type record."""
@@ -159,9 +181,7 @@ class TutorialRecord(AlgoliaRecord):
         """
         base_url = cls.compute_base_url(tutorial=tutorial)
         kwargs: Dict[str, Any] = {
-            "object_id": cls.compute_object_id(
-                tutorial=tutorial, section=section
-            ),
+            "object_id": cls.compute_object_id_for_section(section),
             "url": section.url,
             "root_url": base_url,
             "root_title": tutorial.h1,
@@ -188,22 +208,6 @@ class TutorialRecord(AlgoliaRecord):
             kwargs["thumbnail_url"] = tutorial.images[0]
 
         return cls(**kwargs)
-
-    @staticmethod
-    def compute_object_id(
-        *, tutorial: ReducedTutorial, section: Section
-    ) -> str:
-        """Compute the objectID of the record.
-
-        This is computed based on the URL and section heading hierarchy.
-        """
-        url_component = b64encode(section.url.lower().encode("utf-8")).decode(
-            "utf-8"
-        )
-        heading_component = b64encode(
-            " ".join(section.headings).encode("utf-8")
-        ).decode("utf-8")
-        return f"{url_component}-{heading_component}"
 
     @staticmethod
     def compute_base_url(*, tutorial: ReducedTutorial) -> str:
