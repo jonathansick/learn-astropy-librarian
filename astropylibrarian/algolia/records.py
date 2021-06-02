@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-__all__ = ["ContentType", "AlgoliaRecord", "TutorialRecord"]
+__all__ = ["ContentType", "AlgoliaRecord", "TutorialRecord", "GuideRecord"]
 
 import datetime
 from base64 import b64encode
@@ -17,6 +17,10 @@ if TYPE_CHECKING:
     from astropylibrarian.keywords import KeywordDb
     from astropylibrarian.reducers.tutorial import ReducedTutorial
     from astropylibrarian.reducers.utils import Section
+    from astropylibrarian.reduers.jupyterbook import (
+        JupyterBookMetadata,
+        JupyterBookPage,
+    )
 
 
 class ContentType(str, Enum):
@@ -227,3 +231,52 @@ class TutorialRecord(AlgoliaRecord):
         return urlunparse(
             (url_parts.scheme, url_parts.netloc, url_parts.path, "", "", "")
         )
+
+
+class GuideRecord(AlgoliaRecord):
+    """A Pydantic model of a "guide" content type record."""
+
+    content_type: ContentType = Field(
+        description="Content type.", default=ContentType.guide
+    )
+
+    @validator("content_type")
+    def validate_content_type(cls, v: Optional[str]) -> str:
+        if v is None:
+            return ContentType.guide
+        elif v != ContentType.guide:
+            raise ValueError("Content type must be `guide`.")
+        return v
+
+    @classmethod
+    def from_section(
+        cls,
+        *,
+        site_metadata: JupyterBookMetadata,
+        page: JupyterBookPage,
+        section: Section,
+    ) -> GuideRecord:
+        if page.image_urls:
+            thumbnail_url = page.image_urls[0]
+        elif site_metadata.logo_url:
+            thumbnail_url = site_metadata.logo_url
+        else:
+            thumbnail_url = None
+
+        # TODO change importance so all pages below the homepage are reduced
+        # in importance?
+
+        kwargs: Dict[str, Any] = {
+            "object_id": cls.compute_object_id_for_section(section),
+            "url": section.url,
+            "root_url": site_metadata.root_url,
+            "root_title": site_metadata.title,
+            "root_summary": site_metadata.description,
+            "base_url": page.url,
+            "importance": section.header_level,  # FIXME?
+            "content": section.content,
+            "thumbnail_url": thumbnail_url,
+        }
+        for i, heading in enumerate(section.headings):
+            kwargs[f"h{i+1}"] = heading
+        return cls(**kwargs)

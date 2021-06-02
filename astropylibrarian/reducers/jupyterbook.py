@@ -8,6 +8,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 from pydantic import BaseModel, HttpUrl, validator
 
+from astropylibrarian.algolia.records import GuideRecord
 from astropylibrarian.reducers.utils import iter_sphinx_sections
 
 if TYPE_CHECKING:
@@ -27,6 +28,10 @@ class JupyterBookPage:
     @property
     def doc(self) -> lxml.html.HtmlElement:
         return self._doc
+
+    @property
+    def url(self) -> str:
+        return self.html_page.url
 
     @property
     def title(self) -> Optional[str]:
@@ -78,6 +83,12 @@ class JupyterBookPage:
             if link.attrib["href"] != "#"  # skip homepage
         ]
 
+    @property
+    def image_urls(self) -> List[str]:
+        """URLs to images in the main content area."""
+        images = self.doc.cssselect("#main-content img")
+        return [urljoin(self.url, img.attrib["src"]) for img in images]
+
     def iter_sections(self) -> Iterator[Section]:
         """Iterate through sections in the page.
 
@@ -96,6 +107,30 @@ class JupyterBookPage:
             content_callback=self._clean_content,
         ):
             yield section
+
+    def iter_records(
+        self, *, site_metadata: JupyterBookMetadata
+    ) -> Iterator[GuideRecord]:
+        """Iterate over all Algolia search database records that are
+        extractable from the page.
+
+        Parameters
+        ----------
+        site_metadata : `JupyterBookMetadata`
+            Metadata about the JupyterBook site, as a whole. This information
+            is included with each
+            `~astropylibrarian.algolia.records.GuideRecord` to provide
+            context for the search record within a guide..
+
+        Yields
+        ------
+        `astropylibrarian.algolia.records.GuideRecord`
+            A record that is exportable to Algolia.
+        """
+        for section in self.iter_sections():
+            yield GuideRecord.from_section(
+                site_metadata=site_metadata, page=self, section=section
+            )
 
     @staticmethod
     def _clean_content(x: str) -> str:
