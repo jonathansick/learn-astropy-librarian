@@ -9,6 +9,7 @@ from __future__ import annotations
 
 __all__ = ["index_jupyterbook"]
 
+import asyncio
 import re
 from typing import TYPE_CHECKING, List, Union
 from urllib.parse import urljoin
@@ -18,6 +19,9 @@ from astropylibrarian.reducers.jupyterbook import (
     JupyterBookPage,
 )
 from astropylibrarian.workflows.download import download_html
+from astropylibrarian.workflows.indexjupyterbookpage import (
+    index_jupyterbook_page,
+)
 
 if TYPE_CHECKING:
     import aiohttp
@@ -56,9 +60,27 @@ async def index_jupyterbook(
     homepage_metadata = extract_homepage_metadata(
         html_page=homepage, root_url=url
     )
-    print(homepage_metadata)
-    # TODO create async jobs to download each page
-    return []
+    # Include the homepage with the list of URLs
+    page_urls = set(
+        [str(url) for url in homepage_metadata.page_urls] + [homepage.url]
+    )
+    tasks = [
+        asyncio.create_task(
+            index_jupyterbook_page(
+                url=url,
+                jupyterbook_metadata=homepage_metadata,
+                algolia_client=algolia_client,
+                index_name=index_name,
+                http_client=http_client,
+            )
+        )
+        for url in page_urls
+    ]
+    object_ids: List[str] = []
+    for result in asyncio.as_completed(tasks):
+        _objectids = await result
+        object_ids.extend(_objectids)
+    return object_ids
 
 
 async def download_homepage(
