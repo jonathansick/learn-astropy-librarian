@@ -25,16 +25,16 @@ from astropylibrarian.workflows.indexjupyterbookpage import (
 
 if TYPE_CHECKING:
     import aiohttp
-    from algoliasearch.search_client import SearchClient
 
+    from astropylibrarian.client import AlgoliaIndexType
     from astropylibrarian.resources import HtmlPage
 
 
 async def index_jupyterbook(
     *,
     url: str,
-    http_client: "aiohttp.ClientSession",
-    algolia_client: "SearchClient",
+    http_client: aiohttp.ClientSession,
+    algolia_index: AlgoliaIndexType,
     index_name: str,
 ) -> List[str]:
     """Ingest a Jupyter Book site as a Learn Astropy Guide.
@@ -49,6 +49,9 @@ async def index_jupyterbook(
         The Algolia client.
     index_name : `str`
         The full name of the Algolia index to save the records to.
+    algolia_index
+        Algolia index created by the
+        `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
 
     Returns
     -------
@@ -69,8 +72,7 @@ async def index_jupyterbook(
             index_jupyterbook_page(
                 url=url,
                 jupyterbook_metadata=homepage_metadata,
-                algolia_client=algolia_client,
-                index_name=index_name,
+                algolia_index=algolia_index,
                 http_client=http_client,
             )
         )
