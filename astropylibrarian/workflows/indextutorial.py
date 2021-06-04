@@ -79,5 +79,5 @@ async def index_tutorial(
     # and delete and records that don't exist in the present record listing
     # because they're old content.
 
-    saved_object_ids = [r.object_id for r in records]
+    saved_object_ids = [r.objectID for r in records]
     return saved_object_ids

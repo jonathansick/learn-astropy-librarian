@@ -24,7 +24,7 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
     record = records[0]
 
     assert record.base_url == color_excess_tutorial.url
-    assert record.object_id == (
+    assert record.objectID == (
         "aHR0cDovL2xlYXJuLmFzdHJvcHkub3JnL3JzdC10dXRvcmlhbHMvY29sb3ItZXhjZXNz"
         "Lmh0bWwjbGVhcm5pbmctZ29hbHM=-QW5hbHl6aW5nIGludGVyc3RlbGxhciByZWRkZW5"
         "pbmcgYW5kIGNhbGN1bGF0aW5nIHN5bnRoZXRpYyBwaG90b21ldHJ5IExlYXJuaW5nIEd"
@@ -39,7 +39,7 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
 
     # Ensure that the structure of other sections matches the expectation
     assert data == {
-        "object_id": record.object_id,
+        "objectID": record.objectID,
         "root_url": color_excess_tutorial.url,
         "root_title": reduced_tutorial.h1,
         "root_summary": reduced_tutorial.summary,
@@ -101,7 +101,7 @@ def test_guiderecord(
     r = records[0]
     data = json.loads(r.json(exclude_none=True))
 
-    assert data["object_id"] == (
+    assert data["objectID"] == (
         "aHR0cDovL3d3dy5hc3Ryb3B5Lm9yZy9jY2QtcmVkdWN0aW9uLWFuZC1waG90b21ldHJ5L"
         "Wd1aWRlL25vdGVib29rcy8wMS0wNS1jYWxpYnJhdGlvbi1vdmVydmlldy5odG1sI2Zpcn"
         "N0LXNvbWUtc3RhcnMtd2l0aC1ub2lzZQ==-MS40LiBDYWxpYnJhdGlvbiBvdmVydmlldy"

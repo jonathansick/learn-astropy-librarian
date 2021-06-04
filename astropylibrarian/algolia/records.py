@@ -38,7 +38,7 @@ class ContentType(str, Enum):
 class AlgoliaRecord(BaseModel):
     """A Pydantic model for an Learn Astropy record in Algolia."""
 
-    object_id: str = Field(description="Unique identifier for this record.")
+    objectID: str = Field(description="Unique identifier for this record.")
 
     root_summary: Optional[str] = Field(
         description=(
@@ -108,7 +108,7 @@ class AlgoliaRecord(BaseModel):
 
     @staticmethod
     def compute_object_id_for_section(section: Section) -> str:
-        """Compute an Algolia object ID given a content section.
+        """Compute an Algolia ``objectID`` given a content section.
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ class AlgoliaRecord(BaseModel):
         Returns
         -------
         str
-            The object ID for an Algolia record.
+            The ``objectID`` for an Algolia record.
         """
         url_component = b64encode(section.url.lower().encode("utf-8")).decode(
             "utf-8"
@@ -191,7 +191,7 @@ class TutorialRecord(AlgoliaRecord):
         """
         base_url = cls.compute_base_url(tutorial=tutorial)
         kwargs: Dict[str, Any] = {
-            "object_id": cls.compute_object_id_for_section(section),
+            "objectID": cls.compute_object_id_for_section(section),
             "url": section.url,
             "root_url": base_url,
             "root_title": tutorial.h1,
@@ -267,7 +267,7 @@ class GuideRecord(AlgoliaRecord):
         # in importance?
 
         kwargs: Dict[str, Any] = {
-            "object_id": cls.compute_object_id_for_section(section),
+            "objectID": cls.compute_object_id_for_section(section),
             "url": section.url,
             "root_url": site_metadata.root_url,
             "root_title": site_metadata.title,
