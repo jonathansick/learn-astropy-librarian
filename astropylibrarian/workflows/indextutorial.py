@@ -27,7 +27,6 @@ async def index_tutorial(
     url: str,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
-    index_name: str,
 ) -> List[str]:
     """Asynchronously save records for a tutorial to Algolia (awaitable
     function).

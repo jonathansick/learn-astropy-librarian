@@ -3,18 +3,101 @@
 
 from __future__ import annotations
 
+import asyncio
+
+import aiohttp
 import typer
+
+from astropylibrarian.algolia.client import AlgoliaIndex
+from astropylibrarian.workflows.indexjupyterbook import index_jupyterbook
+from astropylibrarian.workflows.indextutorial import index_tutorial
 
 app = typer.Typer(short_help="Content indexing commands.")
 
 
 @app.command()
-def tutorial() -> None:
+def tutorial(
+    url: str = typer.Argument(..., help="URL for a tutorial."),
+    algolia_id: str = typer.Option(
+        ..., help="Algolia app ID.", envvar="ALGOLIA_ID"
+    ),
+    algolia_key: str = typer.Option(
+        ...,
+        help="Algolia API key.",
+        envvar="ALGOLIA_KEY",
+        prompt=True,
+        confirmation_prompt=False,
+        hide_input=True,
+    ),
+    index: str = typer.Option(
+        ..., help="Name of the Algolia index.", envvar="ALGOLIA_INDEX"
+    ),
+) -> None:
     """Index a single tutorial."""
-    typer.echo("I'm the index tutorial command")
+    event_loop = asyncio.get_event_loop()
+    event_loop.run_until_complete(
+        run_index_tutorial(
+            url=url,
+            algolia_id=algolia_id,
+            algolia_key=algolia_key,
+            index=index,
+        )
+    )
+
+
+async def run_index_tutorial(
+    *, url: str, algolia_id: str, algolia_key: str, index: str
+) -> None:
+    async with aiohttp.ClientSession() as http_client:
+        async with AlgoliaIndex(
+            key=algolia_key, app_id=algolia_id, name=index
+        ) as algolia_index:
+            await index_tutorial(
+                url=url, http_client=http_client, algolia_index=algolia_index
+            )
+    typer.echo(f"Finished indexing {url}")
 
 
 @app.command()
-def guide() -> None:
+def guide(
+    url: str = typer.Argument(..., help="Root URL for a guide."),
+    algolia_id: str = typer.Option(
+        ..., help="Algolia app ID.", envvar="ALGOLIA_ID"
+    ),
+    algolia_key: str = typer.Option(
+        ...,
+        help="Algolia API key.",
+        envvar="ALGOLIA_KEY",
+        prompt=True,
+        confirmation_prompt=False,
+        hide_input=True,
+    ),
+    index: str = typer.Option(
+        ..., help="Name of the Algolia index.", envvar="ALGOLIA_INDEX"
+    ),
+) -> None:
     """Index a guide."""
-    typer.echo("I'm the index guide command")
+    event_loop = asyncio.get_event_loop()
+    event_loop.run_until_complete(
+        run_index_guide(
+            url=url,
+            algolia_id=algolia_id,
+            algolia_key=algolia_key,
+            index=index,
+        )
+    )
+
+
+async def run_index_guide(
+    *, url: str, algolia_id: str, algolia_key: str, index: str
+) -> None:
+    async with aiohttp.ClientSession() as http_client:
+        async with AlgoliaIndex(
+            key=algolia_key, app_id=algolia_id, name=index
+        ) as algolia_index:
+            await index_jupyterbook(
+                url=url,
+                http_client=http_client,
+                algolia_index=algolia_index,
+            )
+    typer.echo(f"Finished indexing {url}")
