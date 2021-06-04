@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Workflow for indexing a learn.astropy tutorial to Algolia.
-"""
+"""Workflow for indexing a learn.astropy tutorial to Algolia."""
+
+from __future__ import annotations
 
 __all__ = ["index_tutorial"]
 
@@ -15,8 +16,8 @@ from astropylibrarian.workflows.download import download_html
 
 if TYPE_CHECKING:
     import aiohttp
-    from algoliasearch.search_client import SearchClient
 
+    from astropylibrarian.client import AlgoliaIndexType
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,8 @@ logger = logging.getLogger(__name__)
 async def index_tutorial(
     *,
     url: str,
-    http_client: "aiohttp.ClientSession",
-    algolia_client: "SearchClient",
+    http_client: aiohttp.ClientSession,
+    algolia_index: AlgoliaIndexType,
     index_name: str,
 ) -> List[str]:
     """Asynchronously save records for a tutorial to Algolia (awaitable
@@ -37,10 +38,9 @@ async def index_tutorial(
         A URL for an HTML page.
     http_client : `aiohttp.ClientSession`
         An open aiohttp client.
-    algolia_client : `algoliasearch.search_client.SearchClient`
-        The Algolia client.
-    index_name : `str`
-        The full name of the Algolia index to save the records to.
+    algolia_index
+        Algolia index created by the
+        `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
 
     Returns
     -------
@@ -69,11 +69,10 @@ async def index_tutorial(
     records = [r for r in tutorial.iter_records()]
     logger.debug(f"Indexing {len(records)} records")
 
-    index = algolia_client.init_index(index_name)
     tasks = [
-        index.save_object_async(r.dict(exclude_none=True)) for r in records
+        algolia_index.save_object_async(r.dict(exclude_none=True))
+        for r in records
     ]
-
     results = await asyncio.gather(*tasks)
     MultipleResponse(results).wait()
 

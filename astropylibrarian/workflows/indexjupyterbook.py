@@ -35,7 +35,6 @@ async def index_jupyterbook(
     url: str,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
-    index_name: str,
 ) -> List[str]:
     """Ingest a Jupyter Book site as a Learn Astropy Guide.
 
@@ -45,10 +44,6 @@ async def index_jupyterbook(
         A URL for an HTML page.
     http_client : `aiohttp.ClientSession`
         An open aiohttp client.
-    algolia_client : `algoliasearch.search_client.SearchClient`
-        The Algolia client.
-    index_name : `str`
-        The full name of the Algolia index to save the records to.
     algolia_index
         Algolia index created by the
         `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
