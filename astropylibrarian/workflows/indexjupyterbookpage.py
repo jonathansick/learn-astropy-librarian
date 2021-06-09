@@ -34,5 +34,5 @@ async def index_jupyterbook_page(
     response = await algolia_index.save_objects_async(records)
     print(response)
 
-    object_ids = [r["object_id"] for r in records]
+    object_ids = [r["objectID"] for r in records]
     return object_ids
