@@ -4,11 +4,14 @@
 
 __all__ = ("Section", "iter_sphinx_sections")
 
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 if TYPE_CHECKING:
     import lxml.html
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -98,10 +101,16 @@ def iter_sphinx_sections(
                 content_callback=content_callback,
             )
         else:
-            if content_callback:
-                text_elements.append(content_callback(element.text_content()))
-            else:
-                text_elements.append(element.text_content())
+            try:
+                if content_callback:
+                    text_elements.append(
+                        content_callback(element.text_content())
+                    )
+                else:
+                    text_elements.append(element.text_content())
+            except ValueError:
+                logger.debug("Could not get content from %s", element)
+                continue
 
     yield Section(
         content="\n\n".join(text_elements), headings=current_headers, url=url
