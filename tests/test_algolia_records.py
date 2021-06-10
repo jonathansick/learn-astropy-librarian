@@ -141,8 +141,7 @@ def test_guiderecord(
         "stars_with_noise = imsim.stars(image, 50, max_counts=2000, fwhm=10) "
         "+ imsim.read_noise(image, noise_amount, gain=gain)  "
         "show_image(stars_with_noise, cmap='gray', percu=99.9) "
-        "plt.title('Stars with noise')     "
-        "Text(0.5, 1.0, 'Stars with noise')"
+        "plt.title('Stars with noise')"
     )
     assert "date_indexed" in data
     assert data["thumbnail_url"] == (

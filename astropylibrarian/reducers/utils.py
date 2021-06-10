@@ -5,6 +5,7 @@
 __all__ = ("Section", "iter_sphinx_sections")
 
 import logging
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
@@ -101,15 +102,34 @@ def iter_sphinx_sections(
                 content_callback=content_callback,
             )
         else:
+            # To modify this element to extract content from it
+            # To extract content from this element we may need to modify it
+            # We don't want to affect the whole document tree though, so
+            # we make this temporary copy.
+            content_element = deepcopy(element)
+
+            # Delete "cell_output" divs, which are the code outputs from
+            # Jupyter-based pages (Jupyter Notebook). The outputs can be large
+            # and are often less relevant.
+            try:
+                output_divs = content_element.find_class("cell_output")
+                for output_div in output_divs:
+                    output_div.drop_tree()
+            except ValueError:
+                # Raised because "HtmlComment" element does not support
+                # find_class().
+                pass
+
+            # Get plain-text content of the section
             try:
                 if content_callback:
                     text_elements.append(
-                        content_callback(element.text_content())
+                        content_callback(content_element.text_content())
                     )
                 else:
-                    text_elements.append(element.text_content())
+                    text_elements.append(content_element.text_content())
             except ValueError:
-                logger.debug("Could not get content from %s", element)
+                logger.debug("Could not get content from %s", content_element)
                 continue
 
     yield Section(
