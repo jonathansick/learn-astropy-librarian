@@ -10,6 +10,7 @@ from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
     Any,
+    AsyncIterator,
     Dict,
     Iterator,
     List,
@@ -138,6 +139,26 @@ class MockAlgoliaIndex(BaseAlgoliaIndex):
             self._saved_objects.append(deepcopy(obj))
         return MockMultiResponse()
 
+    async def browse_objects_async(
+        self, search_settings: Dict[str, Any]
+    ) -> AsyncIterator[Dict[str, Any]]:
+        self._logger.debug("Got search settings %s", search_settings)
+        # FIXME need to flesh out this mock:
+        # - provide a way to seed data
+        # - use attributesToRetrieve to inform what attributes are sent back
+        for _ in range(5):
+            yield {}
+
+    async def delete_objects_async(self, objectids: List[str]) -> List[str]:
+        return objectids
+
 
 class MockMultiResponse:
     """Mock of an algolia resonse."""
+
+
+def escape_facet_value(value: str) -> str:
+    """Escape and quote a facet value for an Algolia search."""
+    value = value.replace('"', r"\"").replace("'", r"\'")
+    value = f'"{value}"'
+    return value

@@ -3,11 +3,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import typer
 
+from astropylibrarian.algolia.client import AlgoliaIndex
 from astropylibrarian.cli import index
+from astropylibrarian.workflows.deleterooturl import delete_root_url
 
 app = typer.Typer(
     short_help="Manage the content indexed by the Learn Astropy project."
@@ -62,6 +65,39 @@ def main_callback(
 
 
 @app.command()
-def delete() -> None:
+def delete(
+    url: str = typer.Argument(..., help="Root URL to delete"),
+    algolia_id: str = typer.Option(
+        ..., help="Algolia app ID.", envvar="ALGOLIA_ID"
+    ),
+    algolia_key: str = typer.Option(
+        ...,
+        help="Algolia API key.",
+        envvar="ALGOLIA_KEY",
+        prompt=True,
+        confirmation_prompt=False,
+        hide_input=True,
+    ),
+    index: str = typer.Option(
+        ..., help="Name of the Algolia index.", envvar="ALGOLIA_INDEX"
+    ),
+) -> None:
     """Delete Algolia records."""
-    typer.echo("I'm the delete command")
+    event_loop = asyncio.get_event_loop()
+    event_loop.run_until_complete(
+        run_delete(
+            url=url,
+            algolia_id=algolia_id,
+            algolia_key=algolia_key,
+            index=index,
+        )
+    )
+
+
+async def run_delete(
+    *, url: str, algolia_id: str, algolia_key: str, index: str
+) -> None:
+    async with AlgoliaIndex(
+        key=algolia_key, app_id=algolia_id, name=index
+    ) as algolia_index:
+        await delete_root_url(root_url=url, algolia_index=algolia_index)
