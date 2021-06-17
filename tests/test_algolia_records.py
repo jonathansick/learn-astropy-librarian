@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 from typing import TYPE_CHECKING
 
 from astropylibrarian.reducers.jupyterbook import JupyterBookPage
@@ -20,26 +19,27 @@ if TYPE_CHECKING:
 def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
     reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
 
-    records = [r for r in reduced_tutorial.iter_records()]
-    record = records[0]
+    records = [r for r in reduced_tutorial.iter_algolia_objects()]
+    data = records[0]
 
-    assert record.base_url == color_excess_tutorial.url
-    assert record.objectID == (
+    expected_object_ID = (
         "aHR0cDovL2xlYXJuLmFzdHJvcHkub3JnL3JzdC10dXRvcmlhbHMvY29sb3ItZXhjZXNz"
         "Lmh0bWwjbGVhcm5pbmctZ29hbHM=-QW5hbHl6aW5nIGludGVyc3RlbGxhciByZWRkZW5"
         "pbmcgYW5kIGNhbGN1bGF0aW5nIHN5bnRoZXRpYyBwaG90b21ldHJ5IExlYXJuaW5nIEd"
         "vYWxz"
     )
-    data = json.loads(record.json(exclude_none=True))
 
     # Get the indexedDatetime field out because it's dynamic
     indexed_datetime = data.pop("date_indexed")
     # Ensure it's formatted correctly
     datetime.datetime.strptime(indexed_datetime, "%Y-%m-%dT%H:%M:%S.%f")
+    assert isinstance(
+        datetime.datetime.fromisoformat(indexed_datetime), datetime.datetime
+    )
 
     # Ensure that the structure of other sections matches the expectation
     assert data == {
-        "objectID": record.objectID,
+        "objectID": expected_object_ID,
         "root_url": color_excess_tutorial.url,
         "root_title": reduced_tutorial.h1,
         "root_summary": reduced_tutorial.summary,
@@ -97,9 +97,8 @@ def test_guiderecord(
         root_url="http://www.astropy.org/ccd-reduction-and-photometry-guide/",
     )
     page = JupyterBookPage(ccd_guide_01_05)
-    records = [r for r in page.iter_records(site_metadata=metadata)]
-    r = records[0]
-    data = json.loads(r.json(exclude_none=True))
+    records = [r for r in page.iter_algolia_objects(site_metadata=metadata)]
+    data = records[0]
 
     assert data["objectID"] == (
         "aHR0cDovL3d3dy5hc3Ryb3B5Lm9yZy9jY2QtcmVkdWN0aW9uLWFuZC1waG90b21ldHJ5L"
@@ -144,6 +143,8 @@ def test_guiderecord(
         "plt.title('Stars with noise')"
     )
     assert "date_indexed" in data
+    date_indexed = datetime.datetime.fromisoformat(data["date_indexed"])
+    assert isinstance(date_indexed, datetime.datetime)
     assert data["thumbnail_url"] == (
         "http://www.astropy.org/ccd-reduction-and-photometry-guide/_images/"
         "01-05-Calibration-overview_6_1.png"

@@ -28,8 +28,10 @@ async def index_jupyterbook_page(
     html_page = await download_html(url=url, http_client=http_client)
     page = JupyterBookPage(html_page)
     records = [
-        record.dict(exclude_none=True)
-        for record in page.iter_records(site_metadata=jupyterbook_metadata)
+        record
+        for record in page.iter_algolia_objects(
+            site_metadata=jupyterbook_metadata
+        )
     ]
     response = await algolia_index.save_objects_async(records)
     print(response)

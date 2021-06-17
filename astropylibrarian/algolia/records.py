@@ -6,6 +6,7 @@ from __future__ import annotations
 __all__ = ["ContentType", "AlgoliaRecord", "TutorialRecord", "GuideRecord"]
 
 import datetime
+import json
 from base64 import b64encode
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -127,6 +128,22 @@ class AlgoliaRecord(BaseModel):
             " ".join(section.headings).encode("utf-8")
         ).decode("utf-8")
         return f"{url_component}-{heading_component}"
+
+    def export_to_algolia(self) -> Dict[str, Any]:
+        """Export this model into an object that can be uploaded with the
+        Algolia client.
+
+        Notes
+        -----
+        This method:
+
+        1. Serializes to JSON so that all types are JSON-compatible. It also
+           applies the exclude_none argument to pydantic ``BaseModel.json``
+           method.
+        2. Deserializes the JSON into a dict
+        """
+        json_data = self.json(exclude_none=True)
+        return json.loads(json_data)
 
 
 class TutorialRecord(AlgoliaRecord):

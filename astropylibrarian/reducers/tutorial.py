@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ("ReducedTutorial",)
 
-from typing import TYPE_CHECKING, Iterator, List
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 from urllib.parse import urljoin
 
 from astropylibrarian.algolia.records import TutorialRecord
@@ -169,6 +169,19 @@ class ReducedTutorial:
             yield TutorialRecord.from_section(
                 tutorial=self, section=section, keyworddb=keyworddb
             )
+
+    def iter_algolia_objects(self) -> Iterator[Dict[str, Any]]:
+        """Iterate over all objects that are exrtactable from the tutorial in
+        a format ready to use with the algoliasearch client.
+
+        Yields
+        ------
+        dict
+            An object compatible with algolia search ``save_objects``-type
+            methods.
+        """
+        for record in self.iter_records():
+            yield record.export_to_algolia()
 
     def _set_summary_on_h1_section(self) -> None:
         """Replaces the content of the "h1" section, which should be empty,

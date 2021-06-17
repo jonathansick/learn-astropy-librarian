@@ -65,13 +65,10 @@ async def index_tutorial(
 
     tutorial = ReducedTutorial(html_page=tutorial_html)
 
-    records = [r for r in tutorial.iter_records()]
+    records = [r for r in tutorial.iter_algolia_objects()]
     logger.debug(f"Indexing {len(records)} records")
 
-    tasks = [
-        algolia_index.save_object_async(r.dict(exclude_none=True))
-        for r in records
-    ]
+    tasks = [algolia_index.save_object_async(r) for r in records]
     results = await asyncio.gather(*tasks)
     MultipleResponse(results).wait()
 
@@ -79,5 +76,5 @@ async def index_tutorial(
     # and delete and records that don't exist in the present record listing
     # because they're old content.
 
-    saved_object_ids = [r.objectID for r in records]
+    saved_object_ids = [r["objectID"] for r in records]
     return saved_object_ids

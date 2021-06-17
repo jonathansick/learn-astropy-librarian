@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 from urllib.parse import urljoin, urlparse, urlunparse
 
 from pydantic import BaseModel, HttpUrl, validator
@@ -131,6 +131,29 @@ class JupyterBookPage:
             yield GuideRecord.from_section(
                 site_metadata=site_metadata, page=self, section=section
             )
+
+    def iter_algolia_objects(
+        self, *, site_metadata: JupyterBookMetadata
+    ) -> Iterator[Dict[str, Any]]:
+        """Iterate over all objects that are extractable from the page in
+        a format ready to use with the algoliasearch client.
+
+        Parameters
+        ----------
+        site_metadata : `JupyterBookMetadata`
+            Metadata about the JupyterBook site, as a whole. This information
+            is included with each
+            `~astropylibrarian.algolia.records.GuideRecord` to provide
+            context for the search record within a guide..
+
+        Yields
+        ------
+        `dict`
+            An object compatible with algolia search ``save_objects``-type
+            methods.
+        """
+        for record in self.iter_records(site_metadata=site_metadata):
+            yield record.export_to_algolia()
 
     @staticmethod
     def _clean_content(x: str) -> str:
