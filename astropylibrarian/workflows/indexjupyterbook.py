@@ -10,6 +10,7 @@ from __future__ import annotations
 __all__ = ["index_jupyterbook"]
 
 import asyncio
+import logging
 import re
 from typing import TYPE_CHECKING, List, Union
 from urllib.parse import urljoin
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
 
     from astropylibrarian.client import AlgoliaIndexType
     from astropylibrarian.resources import HtmlPage
+
+logger = logging.getLogger(__name__)
 
 
 async def index_jupyterbook(
@@ -55,9 +58,11 @@ async def index_jupyterbook(
         operation.
     """
     homepage = await download_homepage(url=url, http_client=http_client)
+    logger.debug("Downloaded %s", url)
     homepage_metadata = extract_homepage_metadata(
         html_page=homepage, root_url=url
     )
+    logger.debug("Extracted JupyterBook metadata\n%s", homepage_metadata)
     # Include the homepage with the list of URLs
     page_urls = set(
         [str(url) for url in homepage_metadata.page_urls] + [homepage.url]
@@ -77,6 +82,10 @@ async def index_jupyterbook(
     for result in asyncio.as_completed(tasks):
         _objectids = await result
         object_ids.extend(_objectids)
+
+    logger.info(
+        "Finished indexing JupyterBook %s (%d records)", url, len(object_ids)
+    )
     return object_ids
 
 

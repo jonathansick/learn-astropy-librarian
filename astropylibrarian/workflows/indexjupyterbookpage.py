@@ -5,6 +5,7 @@ from __future__ import annotations
 
 __all__ = ["index_jupyterbook_page"]
 
+import logging
 from typing import TYPE_CHECKING, List
 
 from astropylibrarian.reducers.jupyterbook import JupyterBookPage
@@ -16,6 +17,8 @@ if TYPE_CHECKING:
     from astropylibrarian.client import AlgoliaIndexType
     from astropylibrarian.workflows.indexjupyterbook import JupyterBookMetadata
 
+logger = logging.getLogger(__name__)
+
 
 async def index_jupyterbook_page(
     *,
@@ -26,6 +29,8 @@ async def index_jupyterbook_page(
 ) -> List[str]:
     """Ingest a page from a JupyterBook site."""
     html_page = await download_html(url=url, http_client=http_client)
+    logger.debug("Downloaded %s", url)
+
     page = JupyterBookPage(html_page)
     records = [
         record
@@ -33,8 +38,17 @@ async def index_jupyterbook_page(
             site_metadata=jupyterbook_metadata
         )
     ]
+    logger.debug(
+        "Indexing %d records for Jupyter Book page at %s", len(records), url
+    )
     response = await algolia_index.save_objects_async(records)
-    print(response)
+    logger.debug("Algolia save_objects: %s", response.raw_responses)
 
     object_ids = [r["objectID"] for r in records]
+
+    logger.info(
+        "Finished indexing JupyterBook page: %s (%d records)",
+        url,
+        len(object_ids),
+    )
     return object_ids

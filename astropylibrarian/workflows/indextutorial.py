@@ -61,12 +61,12 @@ async def index_tutorial(
        <https://www.algolia.com/doc/api-reference/api-methods/save-objects/>`_)
     """
     tutorial_html = await download_html(url=url, http_client=http_client)
-    logger.debug("Downloaded %s")
+    logger.debug("Downloaded %s", url)
 
     tutorial = ReducedTutorial(html_page=tutorial_html)
 
     records = [r for r in tutorial.iter_algolia_objects()]
-    logger.debug(f"Indexing {len(records)} records")
+    logger.debug("Indexing %d records for tutorial at %s", len(records), url)
 
     tasks = [algolia_index.save_object_async(r) for r in records]
     results = await asyncio.gather(*tasks)

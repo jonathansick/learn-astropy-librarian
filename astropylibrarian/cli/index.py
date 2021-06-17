@@ -55,7 +55,6 @@ async def run_index_tutorial(
             await index_tutorial(
                 url=url, http_client=http_client, algolia_index=algolia_index
             )
-    typer.echo(f"Finished indexing {url}")
 
 
 @app.command()
@@ -100,4 +99,3 @@ async def run_index_guide(
                 http_client=http_client,
                 algolia_index=algolia_index,
             )
-    typer.echo(f"Finished indexing {url}")
