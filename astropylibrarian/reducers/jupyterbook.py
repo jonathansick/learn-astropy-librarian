@@ -76,10 +76,12 @@ class JupyterBookPage:
 
     @property
     def page_urls(self) -> List[str]:
-        """URLs of all pages in a JupyterBook, selected from the ``<nav>``."""
+        """URLs of all pages in a JupyterBook, selected from the ``<nav>``
+        with ID ``bd-docs-nav``.
+        """
         return [
             urljoin(self.html_page.url, link.attrib["href"])
-            for link in self.doc.cssselect("nav a.internal")
+            for link in self.doc.cssselect("nav#bd-docs-nav a.internal")
             if link.attrib["href"] != "#"  # skip homepage
         ]
 
