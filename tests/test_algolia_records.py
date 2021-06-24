@@ -6,6 +6,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
+from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.jupyterbook import JupyterBookPage
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.workflows.indexjupyterbook import (
@@ -19,7 +20,11 @@ if TYPE_CHECKING:
 def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
     reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
 
-    records = [r for r in reduced_tutorial.iter_algolia_objects()]
+    index_epoch = generate_index_epoch()
+    records = [
+        r
+        for r in reduced_tutorial.iter_algolia_objects(index_epoch=index_epoch)
+    ]
     data = records[0]
 
     expected_object_ID = (
@@ -40,6 +45,7 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
     # Ensure that the structure of other sections matches the expectation
     assert data == {
         "objectID": expected_object_ID,
+        "index_epoch": index_epoch,
         "root_url": color_excess_tutorial.url,
         "root_title": reduced_tutorial.h1,
         "root_summary": reduced_tutorial.summary,
@@ -97,7 +103,13 @@ def test_guiderecord(
         root_url="http://www.astropy.org/ccd-reduction-and-photometry-guide/",
     )
     page = JupyterBookPage(ccd_guide_01_05)
-    records = [r for r in page.iter_algolia_objects(site_metadata=metadata)]
+    index_epoch = generate_index_epoch()
+    records = [
+        r
+        for r in page.iter_algolia_objects(
+            site_metadata=metadata, index_epoch=index_epoch
+        )
+    ]
     data = records[0]
 
     assert data["objectID"] == (
@@ -107,6 +119,7 @@ def test_guiderecord(
         "AxLjQuMS4gVGhpcyBub2lzZSBjYW5ub3QgYmUgcmVtb3ZlZCBmcm9tIENDRCBpbWFnZXM"
         "gMS40LjEuMS4gRmlyc3QsIHNvbWUgc3RhcnMgd2l0aCBub2lzZQ=="
     )
+    assert data["index_epoch"] == index_epoch
     assert data["root_summary"] == (
         "The purpose of this text is to walk through image reduction and "
         "photometry using Python, especially Astropy and its affiliated "

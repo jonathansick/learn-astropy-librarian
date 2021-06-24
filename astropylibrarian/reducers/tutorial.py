@@ -162,16 +162,21 @@ class ReducedTutorial:
         else:
             return False
 
-    def iter_records(self) -> Iterator[TutorialRecord]:
+    def iter_records(self, *, index_epoch: str) -> Iterator[TutorialRecord]:
         """Iterate over Algolia records in the tutorial."""
         keyworddb = KeywordDb.load()
         for section in self.sections:
             yield TutorialRecord.from_section(
-                tutorial=self, section=section, keyworddb=keyworddb
+                tutorial=self,
+                section=section,
+                keyworddb=keyworddb,
+                index_epoch=index_epoch,
             )
 
-    def iter_algolia_objects(self) -> Iterator[Dict[str, Any]]:
-        """Iterate over all objects that are exrtactable from the tutorial in
+    def iter_algolia_objects(
+        self, *, index_epoch: str
+    ) -> Iterator[Dict[str, Any]]:
+        """Iterate over all objects that are extratable from the tutorial in
         a format ready to use with the algoliasearch client.
 
         Yields
@@ -180,7 +185,7 @@ class ReducedTutorial:
             An object compatible with algolia search ``save_objects``-type
             methods.
         """
-        for record in self.iter_records():
+        for record in self.iter_records(index_epoch=index_epoch):
             yield record.export_to_algolia()
 
     def _set_summary_on_h1_section(self) -> None:

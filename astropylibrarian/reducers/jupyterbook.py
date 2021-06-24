@@ -111,7 +111,7 @@ class JupyterBookPage:
             yield section
 
     def iter_records(
-        self, *, site_metadata: JupyterBookMetadata
+        self, *, site_metadata: JupyterBookMetadata, index_epoch: str
     ) -> Iterator[GuideRecord]:
         """Iterate over all Algolia search database records that are
         extractable from the page.
@@ -123,6 +123,9 @@ class JupyterBookPage:
             is included with each
             `~astropylibrarian.algolia.records.GuideRecord` to provide
             context for the search record within a guide..
+        index_epoch : str
+            A unique identifier for the indexing job. This is used to delete
+            old records from previous indexings.
 
         Yields
         ------
@@ -131,11 +134,14 @@ class JupyterBookPage:
         """
         for section in self.iter_sections():
             yield GuideRecord.from_section(
-                site_metadata=site_metadata, page=self, section=section
+                site_metadata=site_metadata,
+                page=self,
+                section=section,
+                index_epoch=index_epoch,
             )
 
     def iter_algolia_objects(
-        self, *, site_metadata: JupyterBookMetadata
+        self, *, site_metadata: JupyterBookMetadata, index_epoch: str
     ) -> Iterator[Dict[str, Any]]:
         """Iterate over all objects that are extractable from the page in
         a format ready to use with the algoliasearch client.
@@ -147,6 +153,9 @@ class JupyterBookPage:
             is included with each
             `~astropylibrarian.algolia.records.GuideRecord` to provide
             context for the search record within a guide..
+        index_epoch : str
+            A unique identifier for the indexing job. This is used to delete
+            old records from previous indexings.
 
         Yields
         ------
@@ -154,7 +163,9 @@ class JupyterBookPage:
             An object compatible with algolia search ``save_objects``-type
             methods.
         """
-        for record in self.iter_records(site_metadata=site_metadata):
+        for record in self.iter_records(
+            site_metadata=site_metadata, index_epoch=index_epoch
+        ):
             yield record.export_to_algolia()
 
     @staticmethod

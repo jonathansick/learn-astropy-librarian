@@ -15,6 +15,7 @@ import re
 from typing import TYPE_CHECKING, List, Union
 from urllib.parse import urljoin
 
+from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.jupyterbook import (
     JupyterBookMetadata,
     JupyterBookPage,
@@ -67,11 +68,13 @@ async def index_jupyterbook(
     page_urls = set(
         [str(url) for url in homepage_metadata.page_urls] + [homepage.url]
     )
+    index_epoch = generate_index_epoch()
     tasks = [
         asyncio.create_task(
             index_jupyterbook_page(
                 url=url,
                 jupyterbook_metadata=homepage_metadata,
+                index_epoch=index_epoch,
                 algolia_index=algolia_index,
                 http_client=http_client,
             )

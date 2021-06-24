@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, List
 
 from algoliasearch.responses import MultipleResponse
 
+from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.workflows.download import download_html
 
@@ -65,7 +66,10 @@ async def index_tutorial(
 
     tutorial = ReducedTutorial(html_page=tutorial_html)
 
-    records = [r for r in tutorial.iter_algolia_objects()]
+    index_epoch = generate_index_epoch()
+    records = [
+        r for r in tutorial.iter_algolia_objects(index_epoch=index_epoch)
+    ]
     logger.debug("Indexing %d records for tutorial at %s", len(records), url)
 
     tasks = [algolia_index.save_object_async(r) for r in records]

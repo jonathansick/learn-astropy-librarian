@@ -12,7 +12,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
 
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import UUID4, BaseModel, Field, HttpUrl, validator
 
 if TYPE_CHECKING:
     from astropylibrarian.keywords import KeywordDb
@@ -40,6 +40,15 @@ class AlgoliaRecord(BaseModel):
     """A Pydantic model for an Learn Astropy record in Algolia."""
 
     objectID: str = Field(description="Unique identifier for this record.")
+
+    index_epoch: UUID4 = Field(
+        description=(
+            "Indexing epoch for this root_url. All records with the same "
+            "root_url are ingested at the same time using the same "
+            "index_epoch value. This enables old records, with a "
+            "different index_epoch value to be deleted."
+        )
+    )
 
     root_summary: Optional[str] = Field(
         description=(
@@ -186,6 +195,7 @@ class TutorialRecord(AlgoliaRecord):
         tutorial: ReducedTutorial,
         section: Section,
         keyworddb: KeywordDb,
+        index_epoch: str,
     ) -> TutorialRecord:
         """Create a TutorialRecord from a reduced tutorial HTML page and
         specific section.
@@ -200,6 +210,8 @@ class TutorialRecord(AlgoliaRecord):
         keyworddb : astropylibrarian.keywords.KeywordDb
             The keyword database to sort keywords in tutorials into
             categories for the Learn Astropy UI.
+        index_epoch
+            A unique identifier for the indexing run.
 
         Returns
         -------
@@ -209,6 +221,7 @@ class TutorialRecord(AlgoliaRecord):
         base_url = cls.compute_base_url(tutorial=tutorial)
         kwargs: Dict[str, Any] = {
             "objectID": cls.compute_object_id_for_section(section),
+            "index_epoch": index_epoch,
             "url": section.url,
             "root_url": base_url,
             "root_title": tutorial.h1,
@@ -272,6 +285,7 @@ class GuideRecord(AlgoliaRecord):
         site_metadata: JupyterBookMetadata,
         page: JupyterBookPage,
         section: Section,
+        index_epoch: str,
     ) -> GuideRecord:
         if page.image_urls:
             thumbnail_url = page.image_urls[0]
@@ -285,6 +299,7 @@ class GuideRecord(AlgoliaRecord):
 
         kwargs: Dict[str, Any] = {
             "objectID": cls.compute_object_id_for_section(section),
+            "index_epoch": index_epoch,
             "url": section.url,
             "root_url": site_metadata.root_url,
             "root_title": site_metadata.title,

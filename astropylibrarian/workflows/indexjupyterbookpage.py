@@ -26,6 +26,7 @@ async def index_jupyterbook_page(
     jupyterbook_metadata: JupyterBookMetadata,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
+    index_epoch: str,
 ) -> List[str]:
     """Ingest a page from a JupyterBook site."""
     html_page = await download_html(url=url, http_client=http_client)
@@ -35,7 +36,7 @@ async def index_jupyterbook_page(
     records = [
         record
         for record in page.iter_algolia_objects(
-            site_metadata=jupyterbook_metadata
+            site_metadata=jupyterbook_metadata, index_epoch=index_epoch
         )
     ]
     logger.debug(

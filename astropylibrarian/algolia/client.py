@@ -6,6 +6,7 @@ dry-run operations.
 from __future__ import annotations
 
 import logging
+import uuid
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
@@ -162,3 +163,10 @@ def escape_facet_value(value: str) -> str:
     value = value.replace('"', r"\"").replace("'", r"\'")
     value = f'"{value}"'
     return value
+
+
+def generate_index_epoch() -> str:
+    """Generate a new value for index_epoch key (a hexadecimal string
+    representation of a UUID4 unique identifier.
+    """
+    return str(uuid.uuid4())
