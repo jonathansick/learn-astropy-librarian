@@ -93,7 +93,36 @@ def test_color_excess_v2(color_excess_tutorial_v2: HtmlTestData) -> None:
     """Test the reduction of the color_excess_v2 tutorial, which features
     a new section-based HTML structure.
     """
-    pass
+    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial_v2)
+    assert reduced_tutorial.url == color_excess_tutorial_v2.url
+    assert reduced_tutorial.h1 == (
+        "Analyzing interstellar reddening and calculating synthetic photometry"
+    )
+    assert reduced_tutorial.authors == [
+        "Kristen Larson",
+        "Lia Corrales",
+        "Stephanie T. Douglas",
+        "Kelle Cruz",
+    ]
+    assert reduced_tutorial.keywords == [
+        "dust extinction",
+        "synphot",
+        "astroquery",
+        "units",
+        "photometry",
+        "extinction",
+        "physics",
+        "observational astronomy",
+    ]
+    assert reduced_tutorial.images[0] == (
+        "http://learn.astropy.org/_images/color-excess_9_0.png"
+    )
+    assert reduced_tutorial.summary == (
+        "In this tutorial, we will look at some extinction curves from the "
+        "literature, use one of those curves to deredden an observed spectrum"
+        ", and practice invoking a background source flux in order to "
+        "calculate magnitudes from an extinction model."
+    )
 
 
 def test_coordinates_transform(

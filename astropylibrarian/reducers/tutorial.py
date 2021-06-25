@@ -94,7 +94,9 @@ class ReducedTutorial:
             pass
 
         try:
-            authors_paragraph = doc.cssselect(".card .section p")[0]
+            authors_paragraph = doc.cssselect(
+                ".card section p, .card .section p"
+            )[0]
             self._authors = self._parse_comma_list(authors_paragraph)
         except IndexError:
             pass
@@ -111,12 +113,12 @@ class ReducedTutorial:
         except IndexError:
             pass
 
-        image_elements = doc.cssselect(".card .section img")
+        image_elements = doc.cssselect(".card section img, .card .section img")
         for image_element in image_elements:
             img_src = image_element.attrib["src"]
             self._images.append(urljoin(self.url, img_src))
 
-        root_section = doc.cssselect(".card .section")[0]
+        root_section = doc.cssselect(".card .section, .card section")[0]
         for s in iter_sphinx_sections(
             base_url=self._url,
             root_section=root_section,
