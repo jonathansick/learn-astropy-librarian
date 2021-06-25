@@ -30,6 +30,21 @@ def color_excess_tutorial() -> HtmlTestData:
 
 
 @pytest.fixture(scope="session")
+def color_excess_tutorial_v2() -> HtmlTestData:
+    """The color-excess.html tutorial page obtained in 2021-06.
+
+    This is the same content as `color_excess_tutorial`, but the HTML structure
+    is now different (due to a change in Sphinx or Sphinx extensions?).
+    Instead of div elements with "section" classes, sections now use the
+    section tag itself without classes.
+    """
+    return HtmlTestData.from_path(
+        path="tutorials/color-excess-v2.html",
+        url="http://learn.astropy.org/rst-tutorials/color-excess.html",
+    )
+
+
+@pytest.fixture(scope="session")
 def coordinates_transform_tutorial() -> HtmlTestData:
     """The Coordinates-Transform.html tutorial page."""
     return HtmlTestData.from_path(

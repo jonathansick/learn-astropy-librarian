@@ -89,6 +89,13 @@ def test_color_excess(color_excess_tutorial: HtmlTestData) -> None:
     ]
 
 
+def test_color_excess_v2(color_excess_tutorial_v2: HtmlTestData) -> None:
+    """Test the reduction of the color_excess_v2 tutorial, which features
+    a new section-based HTML structure.
+    """
+    pass
+
+
 def test_coordinates_transform(
     coordinates_transform_tutorial: HtmlTestData,
 ) -> None:
