@@ -21,6 +21,7 @@ from astropylibrarian.reducers.jupyterbook import (
     JupyterBookPage,
 )
 from astropylibrarian.workflows.download import download_html
+from astropylibrarian.workflows.expirerecords import expire_old_records
 from astropylibrarian.workflows.indexjupyterbookpage import (
     index_jupyterbook_page,
 )
@@ -89,6 +90,14 @@ async def index_jupyterbook(
     logger.info(
         "Finished indexing JupyterBook %s (%d records)", url, len(object_ids)
     )
+
+    if object_ids:
+        await expire_old_records(
+            algolia_index=algolia_index,
+            root_url=homepage_metadata.root_url,
+            index_epoch=index_epoch,
+        )
+
     return object_ids
 
 

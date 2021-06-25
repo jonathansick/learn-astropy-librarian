@@ -5,15 +5,13 @@ from __future__ import annotations
 
 __all__ = ["index_tutorial"]
 
-import asyncio
 import logging
 from typing import TYPE_CHECKING, List
-
-from algoliasearch.responses import MultipleResponse
 
 from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.tutorial import ReducedTutorial
 from astropylibrarian.workflows.download import download_html
+from astropylibrarian.workflows.expirerecords import expire_old_records
 
 if TYPE_CHECKING:
     import aiohttp
@@ -72,13 +70,16 @@ async def index_tutorial(
     ]
     logger.debug("Indexing %d records for tutorial at %s", len(records), url)
 
-    tasks = [algolia_index.save_object_async(r) for r in records]
-    results = await asyncio.gather(*tasks)
-    MultipleResponse(results).wait()
+    saved_object_ids: List[str] = []
+    response = await algolia_index.save_objects_async(records)
+    for r in response.raw_responses:
+        _oids = r.get("objectIds", [])
+        assert isinstance(_oids, list)
+        saved_object_ids.extend(_oids)
 
-    # TODO Next step is to search for existing records about this URL
-    # and delete and records that don't exist in the present record listing
-    # because they're old content.
+    if saved_object_ids:
+        await expire_old_records(
+            algolia_index=algolia_index, root_url=url, index_epoch=index_epoch
+        )
 
-    saved_object_ids = [r["objectID"] for r in records]
     return saved_object_ids
