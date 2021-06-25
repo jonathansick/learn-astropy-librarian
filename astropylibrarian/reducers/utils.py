@@ -58,7 +58,8 @@ def iter_sphinx_sections(
     header.
 
     This class is designed specifically for Sphinx-generated HTML, where
-    ``div.section`` elements to contain each hierarchical section of content.
+    ``div.section`` or ``section`` elements to contain each hierarchical
+    section of content.
 
     Parameters
     ----------
@@ -93,7 +94,9 @@ def iter_sphinx_sections(
             if header_callback:
                 current_header = header_callback(current_header)
             current_headers = headers + [current_header]
-        elif element.tag == "div" and "section" in element.classes:
+        elif (element.tag == "section") or (
+            element.tag == "div" and "section" in element.classes
+        ):
             yield from iter_sphinx_sections(
                 root_section=element,
                 base_url=base_url,

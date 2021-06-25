@@ -124,6 +124,50 @@ def test_color_excess_v2(color_excess_tutorial_v2: HtmlTestData) -> None:
         "calculate magnitudes from an extinction model."
     )
 
+    assert len(reduced_tutorial.sections) == 8
+
+    assert reduced_tutorial.sections[0].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Learning Goals",
+    ]
+    assert reduced_tutorial.sections[1].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Companion Content",
+    ]
+    assert reduced_tutorial.sections[2].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry"
+    ]
+    assert reduced_tutorial.sections[2].content == reduced_tutorial.summary
+    assert reduced_tutorial.sections[3].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Introduction",
+    ]
+    assert reduced_tutorial.sections[4].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 1: Investigate Extinction Models",
+    ]
+    assert reduced_tutorial.sections[5].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 2: Deredden a Spectrum",
+    ]
+    assert reduced_tutorial.sections[6].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 3: Calculate Color Excess with synphot",
+        "Exercise",
+    ]
+    assert reduced_tutorial.sections[7].headings == [
+        "Analyzing interstellar reddening and calculating synthetic "
+        "photometry",
+        "Example 3: Calculate Color Excess with synphot",
+    ]
+
 
 def test_coordinates_transform(
     coordinates_transform_tutorial: HtmlTestData,

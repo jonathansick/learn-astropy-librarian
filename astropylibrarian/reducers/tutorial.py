@@ -134,17 +134,18 @@ class ReducedTutorial:
         # should be subsections of that. In real life, though, it's easy
         # to accidentally use additional h1 eleemnts for subsections.
         h1_heading = self._sections[-1].headings[-1]
-        for sibling in root_section.itersiblings(tag="div"):
-            if "section" in sibling.classes:
-                for s in iter_sphinx_sections(
-                    root_section=sibling,
-                    base_url=self._url,
-                    headers=[h1_heading],
-                    header_callback=lambda x: x.rstrip("¶"),
-                    content_callback=clean_content,
-                ):
-                    if not self._is_ignored_section(s):
-                        self._sections.append(s)
+        for sibling in root_section.itersiblings(tag=("div", "section")):
+            if sibling.tag == "div" and "section" not in sibling.classes:
+                continue
+            for s in iter_sphinx_sections(
+                root_section=sibling,
+                base_url=self._url,
+                headers=[h1_heading],
+                header_callback=lambda x: x.rstrip("¶"),
+                content_callback=clean_content,
+            ):
+                if not self._is_ignored_section(s):
+                    self._sections.append(s)
 
     def _is_ignored_section(self, section: Section) -> bool:
         """Determine if a section should be ignored.
