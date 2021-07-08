@@ -103,9 +103,7 @@ class MockAlgoliaIndex(BaseAlgoliaIndex):
 
     Use this client as a drop-in replaceemnt to `AlgoliaIndex` in situations
     where you do not want to make real network requests to Algolia, such as in
-    testing or in dry-run applications. This client keeps tracks of what calls
-    it would have made so that you can understand how your application uses
-    Algolia.
+    testing or in dry-run applications.
 
     Parameters
     ----------
