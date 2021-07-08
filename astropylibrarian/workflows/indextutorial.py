@@ -1,25 +1,22 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-"""Workflow for indexing a learn.astropy tutorial to Algolia.
-"""
+"""Workflow for indexing a learn.astropy tutorial to Algolia."""
+
+from __future__ import annotations
 
 __all__ = ["index_tutorial"]
 
-import asyncio
-import json
 import logging
 from typing import TYPE_CHECKING, List
 
-from algoliasearch.responses import MultipleResponse
-
-from astropylibrarian.algolia.records import TutorialSectionRecord
+from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.tutorial import ReducedTutorial
-
-from .download import download_html
+from astropylibrarian.workflows.download import download_html
+from astropylibrarian.workflows.expirerecords import expire_old_records
 
 if TYPE_CHECKING:
     import aiohttp
-    from algoliasearch.search_client import SearchClient
 
+    from astropylibrarian.client import AlgoliaIndexType
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +24,8 @@ logger = logging.getLogger(__name__)
 async def index_tutorial(
     *,
     url: str,
-    http_client: "aiohttp.ClientSession",
-    algolia_client: "SearchClient",
-    index_name: str,
+    http_client: aiohttp.ClientSession,
+    algolia_index: AlgoliaIndexType,
 ) -> List[str]:
     """Asynchronously save records for a tutorial to Algolia (awaitable
     function).
@@ -40,10 +36,9 @@ async def index_tutorial(
         A URL for an HTML page.
     http_client : `aiohttp.ClientSession`
         An open aiohttp client.
-    algolia_client : `algoliasearch.search_client.SearchClient`
-        The Algolia client.
-    index_name : `str`
-        The full name of the Algolia index to save the records to.
+    algolia_index
+        Algolia index created by the
+        `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
 
     Returns
     -------
@@ -65,30 +60,26 @@ async def index_tutorial(
        <https://www.algolia.com/doc/api-reference/api-methods/save-objects/>`_)
     """
     tutorial_html = await download_html(url=url, http_client=http_client)
-    logger.debug("Downloaded %s")
+    logger.debug("Downloaded %s", url)
 
-    tutorial = ReducedTutorial(html_source=tutorial_html, url=url)
+    tutorial = ReducedTutorial(html_page=tutorial_html)
 
+    index_epoch = generate_index_epoch()
     records = [
-        TutorialSectionRecord(section=s, tutorial=tutorial)
-        for s in tutorial.sections
+        r for r in tutorial.iter_algolia_objects(index_epoch=index_epoch)
     ]
+    logger.debug("Indexing %d records for tutorial at %s", len(records), url)
 
-    record_objects = [r.data for r in records]
-    logger.debug(f"Indexing {len(record_objects)} objects")
+    saved_object_ids: List[str] = []
+    response = await algolia_index.save_objects_async(records)
+    for r in response.raw_responses:
+        _oids = r.get("objectIds", [])
+        assert isinstance(_oids, list)
+        saved_object_ids.extend(_oids)
 
-    for r in record_objects:
-        logger.debug(json.dumps(r, indent=2))
+    if saved_object_ids:
+        await expire_old_records(
+            algolia_index=algolia_index, root_url=url, index_epoch=index_epoch
+        )
 
-    index = algolia_client.init_index(index_name)
-    tasks = [index.save_object_async(d) for d in record_objects]
-
-    results = await asyncio.gather(*tasks)
-    MultipleResponse(results).wait()
-
-    # TODO Next step is to search for existing records about this URL
-    # and delete and records that don't exist in the present record listing
-    # because they're old content.
-
-    saved_object_ids = [r.object_id for r in records]
     return saved_object_ids

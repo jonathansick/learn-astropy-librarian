@@ -6,22 +6,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import lxml.html
-
 from astropylibrarian.reducers.utils import iter_sphinx_sections
 
 if TYPE_CHECKING:
-    from .conftest import TestHtml
+    from .conftest import HtmlTestData
 
 
-def test_iter_sphinx_sections(color_excess_tutorial: TestHtml) -> None:
+def test_iter_sphinx_sections(color_excess_tutorial: HtmlTestData) -> None:
     """Test the iter_sphinx_sections algorithm using the color-excess.html
     notebook tutorial example.
 
     This example is made complicated by the fact that the heading levels are
     not strictly hierarchical. There are multiple "h1" tags.
     """
-    doc = lxml.html.document_fromstring(color_excess_tutorial.html)
+    doc = color_excess_tutorial.parse()
     root = doc.cssselect(".card .section")[0]
 
     sections = []

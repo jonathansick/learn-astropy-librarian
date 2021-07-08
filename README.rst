@@ -4,6 +4,98 @@ learn-astropy-librarian
 
 The content crawler that supplies Learn Astropy's web search.
 
+Command line interface
+======================
+
+::
+
+    Usage: astropylibrarian [OPTIONS] COMMAND [ARGS]...
+
+      Manage the content index for the Learn Astropy project.
+
+      Astropy Librarian helps you work with the Algolia index that powers the
+      content listing and search for Learn Astropy, https://learn.astropy.org.
+
+      Astropy Librarian is developed at https://github.com/astropy/learn-
+      astropy-librarian
+
+    Options:
+      -v, --verbose                   Verbose output. Use -v for info-type logging
+                                      and -vv for debug-level logging.  [default:
+                                      0]
+
+      --install-completion [bash|zsh|fish|powershell|pwsh]
+                                      Install completion for the specified shell.
+      --show-completion [bash|zsh|fish|powershell|pwsh]
+                                      Show completion for the specified shell, to
+                                      copy it or customize the installation.
+
+      --help                          Show this message and exit.
+
+    Commands:
+      delete  Delete Algolia records.
+      index   Content indexing commands.
+
+astropylibrarian index tutorial
+-------------------------------
+
+::
+
+    Usage: astropylibrarian index tutorial [OPTIONS] URL
+
+      Index a single tutorial.
+
+    Arguments:
+      URL  URL for a tutorial.  [required]
+
+    Options:
+      --algolia-id TEXT   Algolia app ID.  [env var: ALGOLIA_ID; required]
+      --algolia-key TEXT  Algolia API key.  [env var: ALGOLIA_KEY; required]
+      --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
+                          required]
+
+      --help              Show this message and exit.
+
+astropylibrarian index guide
+----------------------------
+
+::
+
+    Usage: astropylibrarian index guide [OPTIONS] URL
+
+      Index a guide.
+
+    Arguments:
+      URL  Root URL for a guide.  [required]
+
+    Options:
+      --algolia-id TEXT   Algolia app ID.  [env var: ALGOLIA_ID; required]
+      --algolia-key TEXT  Algolia API key.  [env var: ALGOLIA_KEY; required]
+      --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
+                          required]
+
+      --help              Show this message and exit.
+
+astropylibrarian delete
+-----------------------
+
+::
+
+    Usage: astropylibrarian delete [OPTIONS] URL
+
+      Delete Algolia records.
+
+    Arguments:
+      URL  Root URL to delete  [required]
+
+    Options:
+      --algolia-id TEXT   Algolia app ID.  [env var: ALGOLIA_ID; required]
+      --algolia-key TEXT  Algolia API key.  [env var: ALGOLIA_KEY; required]
+      --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
+                          required]
+
+      --help              Show this message and exit.
+
 Development primer
 ==================
 

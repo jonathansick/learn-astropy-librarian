@@ -3,14 +3,21 @@
 into search records.
 """
 
+from __future__ import annotations
+
 __all__ = ("ReducedTutorial",)
 
-from typing import List
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 from urllib.parse import urljoin
 
-import lxml.html
+from astropylibrarian.algolia.records import TutorialRecord
+from astropylibrarian.keywords import KeywordDb
+from astropylibrarian.reducers.utils import Section, iter_sphinx_sections
 
-from .utils import Section, iter_sphinx_sections
+if TYPE_CHECKING:
+    import lxml.html
+
+    from astropylibrarian.resources import HtmlPage
 
 
 class ReducedTutorial:
@@ -19,10 +26,8 @@ class ReducedTutorial:
 
     Parameters
     ----------
-    html_source : str
-        The HTML source of the tutorial page.
-    url : str
-        The canonical URL of the tutorial page.
+    html_page : `astropylibrarian.resources.HtmlPage`
+        The downloaded HTML page.
     """
 
     @property
@@ -62,8 +67,8 @@ class ReducedTutorial:
         """
         return self._sections
 
-    def __init__(self, *, html_source: str, url: str) -> None:
-        self._url = url
+    def __init__(self, *, html_page: HtmlPage) -> None:
+        self._url = html_page.url
         self._h1: str = ""
         self._authors: List[str] = []
         self._keywords: List[str] = []
@@ -75,13 +80,13 @@ class ReducedTutorial:
         # they're part of the metadata.
         self.ignored_headings = set(["authors", "keywords", "summary"])
 
-        self._process_html(html_source)
+        self._process_html(html_page)
 
         self._set_summary_on_h1_section()
 
-    def _process_html(self, html_source: str) -> None:
-        """ """
-        doc = lxml.html.document_fromstring(html_source)
+    def _process_html(self, html_page: HtmlPage) -> None:
+        """Process the HTML page."""
+        doc = html_page.parse()
 
         try:
             self._h1 = self._get_section_title(doc.cssselect("h1")[0])
@@ -89,7 +94,9 @@ class ReducedTutorial:
             pass
 
         try:
-            authors_paragraph = doc.cssselect(".card .section p")[0]
+            authors_paragraph = doc.cssselect(
+                ".card section p, .card .section p"
+            )[0]
             self._authors = self._parse_comma_list(authors_paragraph)
         except IndexError:
             pass
@@ -106,12 +113,12 @@ class ReducedTutorial:
         except IndexError:
             pass
 
-        image_elements = doc.cssselect(".card .section img")
+        image_elements = doc.cssselect(".card section img, .card .section img")
         for image_element in image_elements:
             img_src = image_element.attrib["src"]
             self._images.append(urljoin(self.url, img_src))
 
-        root_section = doc.cssselect(".card .section")[0]
+        root_section = doc.cssselect(".card .section, .card section")[0]
         for s in iter_sphinx_sections(
             base_url=self._url,
             root_section=root_section,
@@ -127,17 +134,18 @@ class ReducedTutorial:
         # should be subsections of that. In real life, though, it's easy
         # to accidentally use additional h1 eleemnts for subsections.
         h1_heading = self._sections[-1].headings[-1]
-        for sibling in root_section.itersiblings(tag="div"):
-            if "section" in sibling.classes:
-                for s in iter_sphinx_sections(
-                    root_section=sibling,
-                    base_url=self._url,
-                    headers=[h1_heading],
-                    header_callback=lambda x: x.rstrip("¶"),
-                    content_callback=clean_content,
-                ):
-                    if not self._is_ignored_section(s):
-                        self._sections.append(s)
+        for sibling in root_section.itersiblings(tag=("div", "section")):
+            if sibling.tag == "div" and "section" not in sibling.classes:
+                continue
+            for s in iter_sphinx_sections(
+                root_section=sibling,
+                base_url=self._url,
+                headers=[h1_heading],
+                header_callback=lambda x: x.rstrip("¶"),
+                content_callback=clean_content,
+            ):
+                if not self._is_ignored_section(s):
+                    self._sections.append(s)
 
     def _is_ignored_section(self, section: Section) -> bool:
         """Determine if a section should be ignored.
@@ -156,6 +164,32 @@ class ReducedTutorial:
             return True
         else:
             return False
+
+    def iter_records(self, *, index_epoch: str) -> Iterator[TutorialRecord]:
+        """Iterate over Algolia records in the tutorial."""
+        keyworddb = KeywordDb.load()
+        for section in self.sections:
+            yield TutorialRecord.from_section(
+                tutorial=self,
+                section=section,
+                keyworddb=keyworddb,
+                index_epoch=index_epoch,
+            )
+
+    def iter_algolia_objects(
+        self, *, index_epoch: str
+    ) -> Iterator[Dict[str, Any]]:
+        """Iterate over all objects that are extractable from the tutorial in
+        a format ready to use with the algoliasearch client.
+
+        Yields
+        ------
+        dict
+            An object compatible with algolia search ``save_objects``-type
+            methods.
+        """
+        for record in self.iter_records(index_epoch=index_epoch):
+            yield record.export_to_algolia()
 
     def _set_summary_on_h1_section(self) -> None:
         """Replaces the content of the "h1" section, which should be empty,

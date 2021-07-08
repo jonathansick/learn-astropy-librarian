@@ -6,13 +6,15 @@ __all__ = ["download_html"]
 
 from typing import TYPE_CHECKING
 
+from astropylibrarian.resources import HtmlPage
+
 if TYPE_CHECKING:
     import aiohttp
 
 
 async def download_html(
     *, url: str, http_client: "aiohttp.ClientSession"
-) -> str:
+) -> HtmlPage:
     """Asynchronously download an HTML page (awaitable function).
 
     Parameters
@@ -24,8 +26,8 @@ async def download_html(
 
     Returns
     -------
-    html_content : `str`
-        The page's HTML.
+    html_page : `astropylibrarian.resources.HtmlPage`
+        The downloaded HTML page.
 
     Raises
     ------
@@ -35,7 +37,13 @@ async def download_html(
     async with http_client.get(url) as resp:
         if resp.status != 200:
             raise DownloadError(f"url={url}")
-        return await resp.text()
+        content = await resp.text()
+        return HtmlPage(
+            html=content,
+            request_url=url,
+            url=str(resp.url),
+            headers=resp.headers,
+        )
 
 
 class DownloadError(RuntimeError):
