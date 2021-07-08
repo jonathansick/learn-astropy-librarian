@@ -37,7 +37,7 @@ class ContentType(str, Enum):
 
 
 class AlgoliaRecord(BaseModel):
-    """A Pydantic model for an Learn Astropy record in Algolia."""
+    """A Pydantic model for a Learn Astropy record in Algolia."""
 
     objectID: str = Field(description="Unique identifier for this record.")
 
