@@ -246,6 +246,7 @@ class TutorialRecord(AlgoliaRecord):
         for i, heading in enumerate(section.headings):
             kwargs[f"h{i+1}"] = heading
         if tutorial.images:
+            # TODO consider an explicitly set thumbnail from tutorial metadata
             kwargs["thumbnail_url"] = tutorial.images[0]
 
         return cls(**kwargs)
@@ -288,6 +289,8 @@ class GuideRecord(AlgoliaRecord):
         index_epoch: str,
     ) -> GuideRecord:
         if page.image_urls:
+            # TODO consider getting a thumbnail explicitly set form guide
+            # metadata
             thumbnail_url = page.image_urls[0]
         elif site_metadata.logo_url:
             thumbnail_url = site_metadata.logo_url
