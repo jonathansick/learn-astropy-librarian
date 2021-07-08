@@ -179,7 +179,7 @@ class ReducedTutorial:
     def iter_algolia_objects(
         self, *, index_epoch: str
     ) -> Iterator[Dict[str, Any]]:
-        """Iterate over all objects that are extratable from the tutorial in
+        """Iterate over all objects that are extractable from the tutorial in
         a format ready to use with the algoliasearch client.
 
         Yields
