@@ -217,6 +217,15 @@ class JupyterBookMetadata(BaseModel):
     page_urls: List[HttpUrl]
     """URLs of pages in the JupyterBook."""
 
+    @property
+    def all_page_urls(self) -> List[str]:
+        """The ``page_urls`` along with the ``homepage_url``."""
+        return list(
+            set(
+                [str(url) for url in self.page_urls] + [str(self.homepage_url)]
+            )
+        )
+
     @validator("root_url")
     def validate_root_url(cls, v: str) -> str:
         """Validate the root url so it points to a directory, not a "file"."""
