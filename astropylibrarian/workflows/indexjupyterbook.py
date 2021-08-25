@@ -40,6 +40,7 @@ async def index_jupyterbook(
     url: str,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
+    priority: int,
 ) -> List[str]:
     """Ingest a Jupyter Book site as a Learn Astropy Guide.
 
@@ -52,6 +53,8 @@ async def index_jupyterbook(
     algolia_index
         Algolia index created by the
         `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
+    priority : int
+        A priority level that elevates a guide in the UI's default sorting.
 
     Returns
     -------
@@ -62,7 +65,7 @@ async def index_jupyterbook(
     homepage = await download_homepage(url=url, http_client=http_client)
     logger.debug("Downloaded %s", url)
     homepage_metadata = extract_homepage_metadata(
-        html_page=homepage, root_url=url
+        html_page=homepage, root_url=url, priority=priority
     )
     logger.debug("Extracted JupyterBook metadata\n%s", homepage_metadata)
     page_urls = homepage_metadata.all_page_urls
@@ -200,7 +203,7 @@ def parse_redirect_url(*, content: str, source_url: str) -> str:
 
 
 def extract_homepage_metadata(
-    *, html_page: HtmlPage, root_url: str
+    *, html_page: HtmlPage, root_url: str, priority: int
 ) -> JupyterBookMetadata:
     """Extract JupyterBook project metadata from it's homepage.
 
@@ -213,6 +216,8 @@ def extract_homepage_metadata(
         input to `index_jupyterbook` and becomes a unique identifier for all
         Algolia records related to a JupyterBook, across all of a JupyterBook's
         pages.
+    priority : int
+        A priority level that elevates a guide in the UI's default sorting.
 
     Returns
     -------
@@ -228,5 +233,6 @@ def extract_homepage_metadata(
         source_repository=homepage.github_repository,
         homepage_url=homepage.url,
         page_urls=homepage.page_urls,
+        priority=priority,
     )
     return md

@@ -26,6 +26,7 @@ async def index_tutorial(
     url: str,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
+    priority: int,
 ) -> List[str]:
     """Asynchronously save records for a tutorial to Algolia (awaitable
     function).
@@ -39,6 +40,8 @@ async def index_tutorial(
     algolia_index
         Algolia index created by the
         `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
+    priority : int
+        A priority level that elevates a tutorial in the UI's default sorting.
 
     Returns
     -------
@@ -66,7 +69,10 @@ async def index_tutorial(
 
     index_epoch = generate_index_epoch()
     records = [
-        r for r in tutorial.iter_algolia_objects(index_epoch=index_epoch)
+        r
+        for r in tutorial.iter_algolia_objects(
+            index_epoch=index_epoch, priority=priority
+        )
     ]
     logger.debug("Indexing %d records for tutorial at %s", len(records), url)
 
