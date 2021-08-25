@@ -145,7 +145,7 @@ def test_guiderecord(
     assert data["h1"] == "1.4. Calibration overview"
     assert data["h2"] == "1.4.1. This noise cannot be removed from CCD images"
     assert data["h3"] == "1.4.1.1. First, some stars with noise"
-    assert data["importance"] == 3
+    assert data["importance"] == 4
     assert data["content"] == (
         "The image below shows stars (the larger “blobs” in the image) but "
         "shows quite a bit of noise as well (the much smaller “dots”)."
