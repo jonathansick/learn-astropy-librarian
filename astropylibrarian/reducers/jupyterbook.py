@@ -207,6 +207,13 @@ class JupyterBookMetadata(BaseModel):
     source_repository: Optional[HttpUrl]
     """The URL of the book's source repository (i.e. GitHub repository)."""
 
+    homepage_url: HttpUrl
+    """The URL of the homepage.
+
+    This is not necessarily the same as the root_url, which redirects to this
+    homepage_url.
+    """
+
     page_urls: List[HttpUrl]
     """URLs of pages in the JupyterBook."""
 

@@ -229,6 +229,7 @@ def extract_homepage_metadata(
         logo_url=homepage.logo_url,
         description=homepage.first_paragraph or "",
         source_repository=homepage.github_repository,
+        homepage_url=homepage.url,
         page_urls=homepage.page_urls,
     )
     return md
