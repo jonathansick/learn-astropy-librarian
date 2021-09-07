@@ -65,10 +65,7 @@ async def index_jupyterbook(
         html_page=homepage, root_url=url
     )
     logger.debug("Extracted JupyterBook metadata\n%s", homepage_metadata)
-    # Include the homepage with the list of URLs
-    page_urls = set(
-        [str(url) for url in homepage_metadata.page_urls] + [homepage.url]
-    )
+    page_urls = homepage_metadata.all_page_urls
     index_epoch = generate_index_epoch()
     tasks = [
         asyncio.create_task(
@@ -229,6 +226,7 @@ def extract_homepage_metadata(
         logo_url=homepage.logo_url,
         description=homepage.first_paragraph or "",
         source_repository=homepage.github_repository,
+        homepage_url=homepage.url,
         page_urls=homepage.page_urls,
     )
     return md

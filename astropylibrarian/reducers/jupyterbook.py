@@ -207,8 +207,24 @@ class JupyterBookMetadata(BaseModel):
     source_repository: Optional[HttpUrl]
     """The URL of the book's source repository (i.e. GitHub repository)."""
 
+    homepage_url: HttpUrl
+    """The URL of the homepage.
+
+    This is not necessarily the same as the root_url, which redirects to this
+    homepage_url.
+    """
+
     page_urls: List[HttpUrl]
     """URLs of pages in the JupyterBook."""
+
+    @property
+    def all_page_urls(self) -> List[str]:
+        """The ``page_urls`` along with the ``homepage_url``."""
+        return list(
+            set(
+                [str(url) for url in self.page_urls] + [str(self.homepage_url)]
+            )
+        )
 
     @validator("root_url")
     def validate_root_url(cls, v: str) -> str:

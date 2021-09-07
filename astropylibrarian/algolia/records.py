@@ -297,8 +297,15 @@ class GuideRecord(AlgoliaRecord):
         else:
             thumbnail_url = None
 
-        # TODO change importance so all pages below the homepage are reduced
-        # in importance?
+        # The importance of 1 is reserved for the homepage URL so that the
+        # homepage is featured in default listings. All other records have
+        # importance bumped down lower.
+        if (page.url == site_metadata.homepage_url) and (
+            section.header_level == 1
+        ):
+            importance = 1
+        else:
+            importance = section.header_level + 1
 
         kwargs: Dict[str, Any] = {
             "objectID": cls.compute_object_id_for_section(section),
@@ -308,7 +315,7 @@ class GuideRecord(AlgoliaRecord):
             "root_title": site_metadata.title,
             "root_summary": site_metadata.description,
             "base_url": page.url,
-            "importance": section.header_level,  # FIXME?
+            "importance": importance,
             "content": section.content,
             "thumbnail_url": thumbnail_url,
         }
