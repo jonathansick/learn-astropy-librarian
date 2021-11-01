@@ -234,3 +234,4 @@ def test_nbcollection_coordinates_transform(
         "OOP",
     ]
     assert len(reduced_tutorial.images) == 0  # all images are embedded here
+    assert len(reduced_tutorial.sections) > 0

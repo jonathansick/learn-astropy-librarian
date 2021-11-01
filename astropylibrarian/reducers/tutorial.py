@@ -10,19 +10,31 @@ from urllib.parse import urljoin
 
 from astropylibrarian.algolia.records import TutorialRecord
 from astropylibrarian.keywords import KeywordDb
-from astropylibrarian.reducers.utils import Section, iter_sphinx_sections
+from astropylibrarian.reducers.utils import (
+    Section,
+    iter_nbcollection_sections,
+    iter_sphinx_sections,
+)
 
 if TYPE_CHECKING:
     import lxml.html
 
     from astropylibrarian.resources import HtmlPage
 
-__all__ = ["ReducedTutorial", "ReducedSphinxTutorial"]
+__all__ = [
+    "ReducedTutorial",
+    "ReducedSphinxTutorial",
+    "ReducedNbcollectionTutorial",
+]
 
 
 def get_tutorial_reducer(html_page: HtmlPage) -> Type[ReducedTutorial]:
     """Get the reducer appropriate for the tutorial's structure."""
-    return ReducedSphinxTutorial
+    doc = html_page.parse()
+    if len(doc.cssselect(".jp-Notebook")) > 0:
+        return ReducedNbcollectionTutorial
+    else:
+        return ReducedSphinxTutorial
 
 
 class ReducedTutorial:
@@ -269,7 +281,16 @@ class ReducedNbcollectionTutorial(ReducedTutorial):
                 continue
             self._images.append(urljoin(self.url, img_src))
 
-        self._sections = []  # TODO
+        self._sections = []
+        root_element = doc.cssselect(".jp-Notebook")[0]
+        for s in iter_nbcollection_sections(
+            root_element=root_element,
+            base_url=html_page.url,
+            header_callback=lambda x: x.rstrip("¶"),
+            content_callback=clean_content,
+        ):
+            if not self._is_ignored_section(s):
+                self._sections.append(s)
 
 
 def clean_content(x: str) -> str:
