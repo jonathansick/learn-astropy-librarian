@@ -227,6 +227,51 @@ class ReducedSphinxTutorial(ReducedTutorial):
         return element.text_content().rstrip("¶")
 
 
+class ReducedNbcollectionTutorial(ReducedTutorial):
+    """A reduced tutorial notebook that was published with
+    nbcollection/nbconvert.
+    """
+
+    def process_html(self, html_page: HtmlPage) -> None:
+        """Process the HTML page."""
+        doc = html_page.parse()
+
+        try:
+            self._h1 = (
+                doc.cssselect("h1")[0].text_content().rstrip("¶").strip()
+            )
+        except IndexError:
+            pass
+
+        try:
+            authors_paragraph = doc.cssselect("#Authors + p")[0]
+            self._authors = self._parse_comma_list(authors_paragraph)
+        except IndexError:
+            pass
+
+        try:
+            keywords_paragraph = doc.cssselect("#Keywords + p")[0]
+            self._keywords = self._parse_comma_list(keywords_paragraph)
+        except IndexError:
+            pass
+
+        try:
+            summary_paragraph = doc.cssselect("#Summary + p")[0]
+            self._summary = summary_paragraph.text_content().replace("\n", " ")
+        except IndexError:
+            pass
+
+        image_elements = doc.cssselect("img")
+        for image_element in image_elements:
+            img_src = image_element.attrib["src"]
+            if img_src.startswith("data:"):
+                # skip embedded images
+                continue
+            self._images.append(urljoin(self.url, img_src))
+
+        self._sections = []  # TODO
+
+
 def clean_content(x: str) -> str:
     x = x.strip()
     x = x.replace(r"\n", " ")

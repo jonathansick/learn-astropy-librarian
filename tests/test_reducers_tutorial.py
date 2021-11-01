@@ -6,7 +6,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from astropylibrarian.reducers.tutorial import ReducedSphinxTutorial
+from astropylibrarian.reducers.tutorial import (
+    ReducedNbcollectionTutorial,
+    ReducedSphinxTutorial,
+)
 
 if TYPE_CHECKING:
     from .conftest import HtmlTestData
@@ -208,3 +211,26 @@ def test_coordinates_transform(
     for section in reduced_tutorial.sections:
         if section.header_level == 1:
             assert section.content == reduced_tutorial.summary
+
+
+def test_nbcollection_coordinates_transform(
+    nbcollection_coordinates_transform_tutorial: HtmlTestData,
+) -> None:
+    """Test with the nbcollection-generated "Coordinates_Transform.html"
+    dataset.
+    """
+    test_data = nbcollection_coordinates_transform_tutorial  # shorten name
+
+    reduced_tutorial = ReducedNbcollectionTutorial(html_page=test_data)
+
+    assert reduced_tutorial.url == test_data.url
+    assert reduced_tutorial.h1 == (
+        "Astronomical Coordinates 2: "
+        "Transforming Coordinate Systems and Representations"
+    )
+    assert reduced_tutorial.authors == ["Adrian Price-Whelan"]
+    assert reduced_tutorial.keywords == [
+        "coordinates",
+        "OOP",
+    ]
+    assert len(reduced_tutorial.images) == 0  # all images are embedded here
