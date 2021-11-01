@@ -55,6 +55,15 @@ def coordinates_transform_tutorial() -> HtmlTestData:
 
 
 @pytest.fixture(scope="session")
+def nbcollection_coordinates_transform_tutorial() -> HtmlTestData:
+    """The nbcollection-generated Coordinates-Transform.html tutorial page."""
+    return HtmlTestData.from_path(
+        path="nbcollection-tutorials/2-Coordinates-Transforms.html",
+        url="http://learn.astropy.org/tutorials/2-Coordinates-Transforms.html",
+    )
+
+
+@pytest.fixture(scope="session")
 def ccd_guide_index() -> HtmlTestData:
     """The ``ccd-guide/index.html`` page.
 
