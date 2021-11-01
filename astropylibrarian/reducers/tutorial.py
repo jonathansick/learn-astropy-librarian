@@ -5,9 +5,7 @@ into search records.
 
 from __future__ import annotations
 
-__all__ = ("ReducedTutorial",)
-
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Type
 from urllib.parse import urljoin
 
 from astropylibrarian.algolia.records import TutorialRecord
@@ -18,6 +16,13 @@ if TYPE_CHECKING:
     import lxml.html
 
     from astropylibrarian.resources import HtmlPage
+
+__all__ = ["ReducedTutorial", "ReducedSphinxTutorial"]
+
+
+def get_tutorial_reducer(html_page: HtmlPage) -> Type[ReducedTutorial]:
+    """Get the reducer appropriate for the tutorial's structure."""
+    return ReducedSphinxTutorial
 
 
 class ReducedTutorial:
@@ -80,11 +85,81 @@ class ReducedTutorial:
         # they're part of the metadata.
         self.ignored_headings = set(["authors", "keywords", "summary"])
 
-        self._process_html(html_page)
+        self.process_html(html_page)
 
         self._set_summary_on_h1_section()
 
-    def _process_html(self, html_page: HtmlPage) -> None:
+    def process_html(self, html_page: HtmlPage) -> None:
+        """Process the HTML page."""
+        raise NotImplementedError
+
+    def _is_ignored_section(self, section: Section) -> bool:
+        """Determine if a section should be ignored.
+
+        Uses the `ignored_headings` attribute to determine if a section should
+        be ignored.
+
+        Returns
+        -------
+        bool
+            `True` if the section should be ignored; `False` if it should be
+            accepted.
+        """
+        section_headings = set([h.lower() for h in section.headings])
+        if section_headings.intersection(self.ignored_headings):
+            return True
+        else:
+            return False
+
+    def iter_records(
+        self, *, index_epoch: str, priority: int
+    ) -> Iterator[TutorialRecord]:
+        """Iterate over Algolia records in the tutorial."""
+        keyworddb = KeywordDb.load()
+        for section in self.sections:
+            yield TutorialRecord.from_section(
+                tutorial=self,
+                section=section,
+                keyworddb=keyworddb,
+                index_epoch=index_epoch,
+                priority=priority,
+            )
+
+    def iter_algolia_objects(
+        self, *, index_epoch: str, priority: int
+    ) -> Iterator[Dict[str, Any]]:
+        """Iterate over all objects that are extractable from the tutorial in
+        a format ready to use with the algoliasearch client.
+
+        Yields
+        ------
+        dict
+            An object compatible with algolia search ``save_objects``-type
+            methods.
+        """
+        for record in self.iter_records(
+            index_epoch=index_epoch, priority=priority
+        ):
+            yield record.export_to_algolia()
+
+    def _set_summary_on_h1_section(self) -> None:
+        """Replaces the content of the "h1" section, which should be empty,
+        with the summary.
+        """
+        for section in self.sections:
+            if section.header_level == 1:
+                section.content = self.summary
+
+    @staticmethod
+    def _parse_comma_list(element: lxml.html.HtmlElement) -> List[str]:
+        content = element.text_content()
+        return [s.strip() for s in content.split(",")]
+
+
+class ReducedSphinxTutorial(ReducedTutorial):
+    """A reduced tutorial notebook that was published in a Sphinx site."""
+
+    def process_html(self, html_page: HtmlPage) -> None:
         """Process the HTML page."""
         doc = html_page.parse()
 
@@ -147,71 +222,9 @@ class ReducedTutorial:
                 if not self._is_ignored_section(s):
                     self._sections.append(s)
 
-    def _is_ignored_section(self, section: Section) -> bool:
-        """Determine if a section should be ignored.
-
-        Uses the `ignored_headings` attribute to determine if a section should
-        be ignored.
-
-        Returns
-        -------
-        bool
-            `True` if the section should be ignored; `False` if it should be
-            accepted.
-        """
-        section_headings = set([h.lower() for h in section.headings])
-        if section_headings.intersection(self.ignored_headings):
-            return True
-        else:
-            return False
-
-    def iter_records(
-        self, *, index_epoch: str, priority: int
-    ) -> Iterator[TutorialRecord]:
-        """Iterate over Algolia records in the tutorial."""
-        keyworddb = KeywordDb.load()
-        for section in self.sections:
-            yield TutorialRecord.from_section(
-                tutorial=self,
-                section=section,
-                keyworddb=keyworddb,
-                index_epoch=index_epoch,
-                priority=priority,
-            )
-
-    def iter_algolia_objects(
-        self, *, index_epoch: str, priority: int
-    ) -> Iterator[Dict[str, Any]]:
-        """Iterate over all objects that are extractable from the tutorial in
-        a format ready to use with the algoliasearch client.
-
-        Yields
-        ------
-        dict
-            An object compatible with algolia search ``save_objects``-type
-            methods.
-        """
-        for record in self.iter_records(
-            index_epoch=index_epoch, priority=priority
-        ):
-            yield record.export_to_algolia()
-
-    def _set_summary_on_h1_section(self) -> None:
-        """Replaces the content of the "h1" section, which should be empty,
-        with the summary.
-        """
-        for section in self.sections:
-            if section.header_level == 1:
-                section.content = self.summary
-
     @staticmethod
     def _get_section_title(element: lxml.html.HtmlElement) -> str:
         return element.text_content().rstrip("¶")
-
-    @staticmethod
-    def _parse_comma_list(element: lxml.html.HtmlElement) -> List[str]:
-        content = element.text_content()
-        return [s.strip() for s in content.split(",")]
 
 
 def clean_content(x: str) -> str:

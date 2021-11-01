@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from astropylibrarian.reducers.tutorial import ReducedTutorial
+from astropylibrarian.reducers.tutorial import ReducedSphinxTutorial
 
 if TYPE_CHECKING:
     from .conftest import HtmlTestData
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def test_color_excess(color_excess_tutorial: HtmlTestData) -> None:
     """Test with the "color-excess.html" dataset."""
-    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
+    reduced_tutorial = ReducedSphinxTutorial(html_page=color_excess_tutorial)
 
     assert reduced_tutorial.url == color_excess_tutorial.url
     assert reduced_tutorial.h1 == (
@@ -93,7 +93,9 @@ def test_color_excess_v2(color_excess_tutorial_v2: HtmlTestData) -> None:
     """Test the reduction of the color_excess_v2 tutorial, which features
     a new section-based HTML structure.
     """
-    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial_v2)
+    reduced_tutorial = ReducedSphinxTutorial(
+        html_page=color_excess_tutorial_v2
+    )
     assert reduced_tutorial.url == color_excess_tutorial_v2.url
     assert reduced_tutorial.h1 == (
         "Analyzing interstellar reddening and calculating synthetic photometry"
@@ -173,7 +175,7 @@ def test_coordinates_transform(
     coordinates_transform_tutorial: HtmlTestData,
 ) -> None:
     """Test with the "Coordinates_Transform.html" dataset."""
-    reduced_tutorial = ReducedTutorial(
+    reduced_tutorial = ReducedSphinxTutorial(
         html_page=coordinates_transform_tutorial
     )
 

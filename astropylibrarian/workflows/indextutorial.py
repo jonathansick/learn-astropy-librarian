@@ -9,7 +9,7 @@ import logging
 from typing import TYPE_CHECKING, List
 
 from astropylibrarian.algolia.client import generate_index_epoch
-from astropylibrarian.reducers.tutorial import ReducedTutorial
+from astropylibrarian.reducers.tutorial import get_tutorial_reducer
 from astropylibrarian.workflows.download import download_html
 from astropylibrarian.workflows.expirerecords import expire_old_records
 
@@ -65,7 +65,8 @@ async def index_tutorial(
     tutorial_html = await download_html(url=url, http_client=http_client)
     logger.debug("Downloaded %s", url)
 
-    tutorial = ReducedTutorial(html_page=tutorial_html)
+    TutorialReducer = get_tutorial_reducer(tutorial_html)
+    tutorial = TutorialReducer(html_page=tutorial_html)
 
     index_epoch = generate_index_epoch()
     records = [
