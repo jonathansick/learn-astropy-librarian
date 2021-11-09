@@ -217,6 +217,9 @@ class JupyterBookMetadata(BaseModel):
     page_urls: List[HttpUrl]
     """URLs of pages in the JupyterBook."""
 
+    priority: int
+    """A priority level that elevates a guide in the UI's default sorting."""
+
     @property
     def all_page_urls(self) -> List[str]:
         """The ``page_urls`` along with the ``homepage_url``."""

@@ -51,6 +51,7 @@ def test_extract_homepage_metadata(ccd_guide_00_00: HtmlTestData) -> None:
     md = extract_homepage_metadata(
         html_page=ccd_guide_00_00,
         root_url="http://www.astropy.org/ccd-reduction-and-photometry-guide/",
+        priority=1,
     )
     assert md.title == "CCD Data Reduction Guide"
     assert md.logo_url == (
@@ -73,3 +74,4 @@ def test_extract_homepage_metadata(ccd_guide_00_00: HtmlTestData) -> None:
         "http://www.astropy.org/ccd-reduction-and-photometry-guide/notebooks/"
         "01-00-Understanding-an-astronomical-CCD-image.html"
     ) in md.page_urls
+    assert md.priority == 1

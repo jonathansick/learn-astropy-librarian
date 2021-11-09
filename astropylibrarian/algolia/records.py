@@ -16,12 +16,12 @@ from pydantic import UUID4, BaseModel, Field, HttpUrl, validator
 
 if TYPE_CHECKING:
     from astropylibrarian.keywords import KeywordDb
-    from astropylibrarian.reducers.tutorial import ReducedTutorial
-    from astropylibrarian.reducers.utils import Section
-    from astropylibrarian.reduers.jupyterbook import (
+    from astropylibrarian.reducers.jupyterbook import (
         JupyterBookMetadata,
         JupyterBookPage,
     )
+    from astropylibrarian.reducers.tutorial import ReducedTutorial
+    from astropylibrarian.reducers.utils import Section
 
 
 class ContentType(str, Enum):
@@ -116,6 +116,12 @@ class AlgoliaRecord(BaseModel):
         description="URL of an image to use as a thumbnail.",
     )
 
+    priority: int = Field(
+        0,
+        description="Higher values of priority are sorted higher in the "
+        "default search (before a user enters a search term).",
+    )
+
     @staticmethod
     def compute_object_id_for_section(section: Section) -> str:
         """Compute an Algolia ``objectID`` given a content section.
@@ -196,6 +202,7 @@ class TutorialRecord(AlgoliaRecord):
         section: Section,
         keyworddb: KeywordDb,
         index_epoch: str,
+        priority: int,
     ) -> TutorialRecord:
         """Create a TutorialRecord from a reduced tutorial HTML page and
         specific section.
@@ -212,6 +219,9 @@ class TutorialRecord(AlgoliaRecord):
             categories for the Learn Astropy UI.
         index_epoch
             A unique identifier for the indexing run.
+        priority : int
+            A priority level that elevates a tutorial in the UI's default
+            sorting.
 
         Returns
         -------
@@ -242,6 +252,7 @@ class TutorialRecord(AlgoliaRecord):
             "science_keywords": keyworddb.filter_keywords(
                 tutorial.keywords, "science"
             ),
+            "priority": priority,
         }
         for i, heading in enumerate(section.headings):
             kwargs[f"h{i+1}"] = heading
@@ -291,7 +302,7 @@ class GuideRecord(AlgoliaRecord):
         if page.image_urls:
             # TODO consider getting a thumbnail explicitly set form guide
             # metadata
-            thumbnail_url = page.image_urls[0]
+            thumbnail_url: Optional[str] = page.image_urls[0]
         elif site_metadata.logo_url:
             thumbnail_url = site_metadata.logo_url
         else:
@@ -318,6 +329,7 @@ class GuideRecord(AlgoliaRecord):
             "importance": importance,
             "content": section.content,
             "thumbnail_url": thumbnail_url,
+            "priority": site_metadata.priority,
         }
         for i, heading in enumerate(section.headings):
             kwargs[f"h{i+1}"] = heading

@@ -32,6 +32,10 @@ def tutorial(
     index: str = typer.Option(
         ..., help="Name of the Algolia index.", envvar="ALGOLIA_INDEX"
     ),
+    priority: int = typer.Option(
+        0,
+        help="Priority for default sorting (higher numbers appear first)",
+    ),
 ) -> None:
     """Index a single tutorial."""
     event_loop = asyncio.get_event_loop()
@@ -41,19 +45,23 @@ def tutorial(
             algolia_id=algolia_id,
             algolia_key=algolia_key,
             index=index,
+            priority=priority,
         )
     )
 
 
 async def run_index_tutorial(
-    *, url: str, algolia_id: str, algolia_key: str, index: str
+    *, url: str, algolia_id: str, algolia_key: str, index: str, priority: int
 ) -> None:
     async with aiohttp.ClientSession() as http_client:
         async with AlgoliaIndex(
             key=algolia_key, app_id=algolia_id, name=index
         ) as algolia_index:
             await index_tutorial(
-                url=url, http_client=http_client, algolia_index=algolia_index
+                url=url,
+                http_client=http_client,
+                algolia_index=algolia_index,
+                priority=priority,
             )
 
 
@@ -74,6 +82,10 @@ def guide(
     index: str = typer.Option(
         ..., help="Name of the Algolia index.", envvar="ALGOLIA_INDEX"
     ),
+    priority: int = typer.Option(
+        0,
+        help="Priority for default sorting (higher numbers appear first)",
+    ),
 ) -> None:
     """Index a guide."""
     event_loop = asyncio.get_event_loop()
@@ -83,12 +95,13 @@ def guide(
             algolia_id=algolia_id,
             algolia_key=algolia_key,
             index=index,
+            priority=priority,
         )
     )
 
 
 async def run_index_guide(
-    *, url: str, algolia_id: str, algolia_key: str, index: str
+    *, url: str, algolia_id: str, algolia_key: str, index: str, priority: int
 ) -> None:
     async with aiohttp.ClientSession() as http_client:
         async with AlgoliaIndex(
@@ -98,4 +111,5 @@ async def run_index_guide(
                 url=url,
                 http_client=http_client,
                 algolia_index=algolia_index,
+                priority=priority,
             )

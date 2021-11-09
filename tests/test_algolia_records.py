@@ -23,7 +23,9 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
     index_epoch = generate_index_epoch()
     records = [
         r
-        for r in reduced_tutorial.iter_algolia_objects(index_epoch=index_epoch)
+        for r in reduced_tutorial.iter_algolia_objects(
+            index_epoch=index_epoch, priority=0
+        )
     ]
     data = records[0]
 
@@ -92,6 +94,7 @@ def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
         "thumbnail_url": (
             "http://learn.astropy.org/_images/color-excess_9_0.png"
         ),
+        "priority": 0,
     }
 
 
@@ -101,6 +104,7 @@ def test_guiderecord(
     metadata = extract_homepage_metadata(
         html_page=ccd_guide_00_00,
         root_url="http://www.astropy.org/ccd-reduction-and-photometry-guide/",
+        priority=1,
     )
     page = JupyterBookPage(ccd_guide_01_05)
     index_epoch = generate_index_epoch()
@@ -162,3 +166,4 @@ def test_guiderecord(
         "http://www.astropy.org/ccd-reduction-and-photometry-guide/_images/"
         "01-05-Calibration-overview_6_1.png"
     )
+    assert data["priority"] == 1
