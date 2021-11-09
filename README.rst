@@ -54,6 +54,9 @@ astropylibrarian index tutorial
       --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
                           required]
 
+      --priority INTEGER  Priority for default sorting (higher numbers appear
+                          first)  [default: 0]
+
       --help              Show this message and exit.
 
 astropylibrarian index guide
@@ -73,6 +76,9 @@ astropylibrarian index guide
       --algolia-key TEXT  Algolia API key.  [env var: ALGOLIA_KEY; required]
       --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
                           required]
+
+      --priority INTEGER  Priority for default sorting (higher numbers appear
+                          first)  [default: 0]
 
       --help              Show this message and exit.
 
