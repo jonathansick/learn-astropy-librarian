@@ -6,7 +6,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from astropylibrarian.reducers.tutorial import ReducedTutorial
+from astropylibrarian.reducers.tutorial import (
+    ReducedNbcollectionTutorial,
+    ReducedSphinxTutorial,
+)
 
 if TYPE_CHECKING:
     from .conftest import HtmlTestData
@@ -14,7 +17,7 @@ if TYPE_CHECKING:
 
 def test_color_excess(color_excess_tutorial: HtmlTestData) -> None:
     """Test with the "color-excess.html" dataset."""
-    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
+    reduced_tutorial = ReducedSphinxTutorial(html_page=color_excess_tutorial)
 
     assert reduced_tutorial.url == color_excess_tutorial.url
     assert reduced_tutorial.h1 == (
@@ -93,7 +96,9 @@ def test_color_excess_v2(color_excess_tutorial_v2: HtmlTestData) -> None:
     """Test the reduction of the color_excess_v2 tutorial, which features
     a new section-based HTML structure.
     """
-    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial_v2)
+    reduced_tutorial = ReducedSphinxTutorial(
+        html_page=color_excess_tutorial_v2
+    )
     assert reduced_tutorial.url == color_excess_tutorial_v2.url
     assert reduced_tutorial.h1 == (
         "Analyzing interstellar reddening and calculating synthetic photometry"
@@ -173,7 +178,7 @@ def test_coordinates_transform(
     coordinates_transform_tutorial: HtmlTestData,
 ) -> None:
     """Test with the "Coordinates_Transform.html" dataset."""
-    reduced_tutorial = ReducedTutorial(
+    reduced_tutorial = ReducedSphinxTutorial(
         html_page=coordinates_transform_tutorial
     )
 
@@ -206,3 +211,27 @@ def test_coordinates_transform(
     for section in reduced_tutorial.sections:
         if section.header_level == 1:
             assert section.content == reduced_tutorial.summary
+
+
+def test_nbcollection_coordinates_transform(
+    nbcollection_coordinates_transform_tutorial: HtmlTestData,
+) -> None:
+    """Test with the nbcollection-generated "Coordinates_Transform.html"
+    dataset.
+    """
+    test_data = nbcollection_coordinates_transform_tutorial  # shorten name
+
+    reduced_tutorial = ReducedNbcollectionTutorial(html_page=test_data)
+
+    assert reduced_tutorial.url == test_data.url
+    assert reduced_tutorial.h1 == (
+        "Astronomical Coordinates 2: "
+        "Transforming Coordinate Systems and Representations"
+    )
+    assert reduced_tutorial.authors == ["Adrian Price-Whelan"]
+    assert reduced_tutorial.keywords == [
+        "coordinates",
+        "OOP",
+    ]
+    assert len(reduced_tutorial.images) == 0  # all images are embedded here
+    assert len(reduced_tutorial.sections) > 0

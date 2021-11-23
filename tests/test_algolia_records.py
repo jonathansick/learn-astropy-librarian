@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.jupyterbook import JupyterBookPage
-from astropylibrarian.reducers.tutorial import ReducedTutorial
+from astropylibrarian.reducers.tutorial import ReducedSphinxTutorial
 from astropylibrarian.workflows.indexjupyterbook import (
     extract_homepage_metadata,
 )
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 def test_tutorialsectionrecord(color_excess_tutorial: HtmlTestData) -> None:
-    reduced_tutorial = ReducedTutorial(html_page=color_excess_tutorial)
+    reduced_tutorial = ReducedSphinxTutorial(html_page=color_excess_tutorial)
 
     index_epoch = generate_index_epoch()
     records = [

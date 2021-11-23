@@ -2,7 +2,7 @@
 """Utilities for reducing HTML pages into search records.
 """
 
-__all__ = ("Section", "iter_sphinx_sections")
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -12,7 +12,12 @@ from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 if TYPE_CHECKING:
     import lxml.html
 
+__all__ = ["Section", "iter_sphinx_sections", "iter_nbcollection_sections"]
+
 logger = logging.getLogger(__name__)
+
+
+_HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 
 
 @dataclass
@@ -41,8 +46,13 @@ class Section:
         """
         return len(self.headings)
 
-
-_HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
+    def new_section(self, *, tag: str, header: str, url: str) -> Section:
+        new_level = int(tag[1])  # turn e.g. h1 into 1
+        if new_level > self.header_level:
+            new_headers = self.headings + [header]
+        else:
+            new_headers = self.headings[: new_level - 1] + [header]
+        return Section(content="", headings=new_headers, url=url)
 
 
 def iter_sphinx_sections(
@@ -138,3 +148,77 @@ def iter_sphinx_sections(
     yield Section(
         content="\n\n".join(text_elements), headings=current_headers, url=url
     )
+
+
+def iter_nbcollection_sections(
+    *,
+    root_element: "lxml.html.HtmlElement",
+    base_url: str,
+    header_callback: Optional[Callable[[str], str]] = None,
+    content_callback: Optional[Callable[[str], str]] = None,
+) -> Generator[Section, None, None]:
+    current_section = Section(content="", headings=[], url="")
+
+    for content_element in iter_nbcollection_content_elements(
+        root_element=root_element,
+        base_url=base_url,
+        header_callback=header_callback,
+        content_callback=content_callback,
+    ):
+        if content_element.tag in _HEADING_TAGS:
+            # A new heading can trigger a new section.
+            # First yield the current content if it already has content
+            if current_section.headings and current_section.content:
+                yield current_section
+
+            # Now reset the content stack
+            header_id = ""
+            if "id" in content_element.attrib.keys():
+                header_id = content_element.attrib["id"]
+            if header_callback:
+                header_content = header_callback(
+                    content_element.text_content()
+                )
+            else:
+                header_content = content_element.text_content()
+
+            current_section = current_section.new_section(
+                tag=content_element.tag,
+                header=header_content,
+                url=f"{base_url}#{header_id}",
+            )
+        else:
+            # Accumulate content into the current stack
+            if content_callback:
+                current_section.content += (
+                    f" {content_callback(content_element.text_content())}"
+                )
+            else:
+                current_section.content += f" {content_element.text_content()}"
+
+    if current_section.headings:
+        yield current_section
+
+
+def iter_nbcollection_content_elements(
+    *,
+    root_element: lxml.html.HtmlElement,
+    base_url: str,
+    header_callback: Optional[Callable[[str], str]] = None,
+    content_callback: Optional[Callable[[str], str]] = None,
+) -> Generator[lxml.html.HtmlElement, None, None]:
+    for element in root_element:
+        if "jp-RenderedHTMLCommon" in root_element.classes:
+            for child_element in element:
+                yield element
+        elif "CodeMirror" in root_element.classes:
+            yield element
+        elif element.tag == "div":
+            yield from iter_nbcollection_content_elements(
+                root_element=element,
+                base_url=base_url,
+                header_callback=header_callback,
+                content_callback=content_callback,
+            )
+        else:
+            continue
