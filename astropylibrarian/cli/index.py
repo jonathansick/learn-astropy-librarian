@@ -10,7 +10,7 @@ import typer
 
 from astropylibrarian.algolia.client import AlgoliaIndex
 from astropylibrarian.workflows.indexjupyterbook import index_jupyterbook
-from astropylibrarian.workflows.indextutorial import index_tutorial
+from astropylibrarian.workflows.indextutorial import index_tutorial_from_url
 
 app = typer.Typer(short_help="Content indexing commands.")
 
@@ -57,7 +57,7 @@ async def run_index_tutorial(
         async with AlgoliaIndex(
             key=algolia_key, app_id=algolia_id, name=index
         ) as algolia_index:
-            await index_tutorial(
+            await index_tutorial_from_url(
                 url=url,
                 http_client=http_client,
                 algolia_index=algolia_index,

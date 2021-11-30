@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-__all__ = ["index_tutorial"]
+__all__ = ["index_tutorial_from_url", "index_tutorial"]
 
 import logging
 from typing import TYPE_CHECKING, List
@@ -17,19 +17,20 @@ if TYPE_CHECKING:
     import aiohttp
 
     from astropylibrarian.client import AlgoliaIndexType
+    from astropylibrarian.resources import HtmlPage
 
 logger = logging.getLogger(__name__)
 
 
-async def index_tutorial(
+async def index_tutorial_from_url(
     *,
     url: str,
     http_client: aiohttp.ClientSession,
     algolia_index: AlgoliaIndexType,
     priority: int,
 ) -> List[str]:
-    """Asynchronously save records for a tutorial to Algolia (awaitable
-    function).
+    """Asynchronously save records for a tutorial located at a URL to Algolia
+    (awaitable function).
 
     Parameters
     ----------
@@ -65,6 +66,34 @@ async def index_tutorial(
     tutorial_html = await download_html(url=url, http_client=http_client)
     logger.debug("Downloaded %s", url)
 
+    return await index_tutorial(
+        tutorial_html=tutorial_html,
+        algolia_index=algolia_index,
+        priority=priority,
+    )
+
+
+async def index_tutorial(
+    *, tutorial_html: HtmlPage, algolia_index: AlgoliaIndexType, priority: int
+) -> List[str]:
+    """Index a tutorial given a pre-loaded HTML document.
+
+    Parameters
+    ----------
+    tutorial_html : `astropylibrarian.resources.HtmlPage`
+        An HTML page.
+    algolia_index
+        Algolia index created by the
+        `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
+    priority : int
+        A priority level that elevates a tutorial in the UI's default sorting.
+
+    Returns
+    -------
+    object_ids : `list` of `str`
+        List of Algolia record object IDs that are saved by this indexing
+        operation.
+    """
     TutorialReducer = get_tutorial_reducer(tutorial_html)
     tutorial = TutorialReducer(html_page=tutorial_html)
 
@@ -75,7 +104,11 @@ async def index_tutorial(
             index_epoch=index_epoch, priority=priority
         )
     ]
-    logger.debug("Indexing %d records for tutorial at %s", len(records), url)
+    logger.debug(
+        "Indexing %d records for tutorial at %s",
+        len(records),
+        tutorial_html.url,
+    )
 
     saved_object_ids: List[str] = []
     response = await algolia_index.save_objects_async(records)
@@ -86,7 +119,9 @@ async def index_tutorial(
 
     if saved_object_ids:
         await expire_old_records(
-            algolia_index=algolia_index, root_url=url, index_epoch=index_epoch
+            algolia_index=algolia_index,
+            root_url=tutorial_html.url,
+            index_epoch=index_epoch,
         )
 
     return saved_object_ids
