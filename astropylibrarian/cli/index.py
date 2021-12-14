@@ -4,20 +4,25 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+from typing import Optional
 
 import aiohttp
 import typer
 
 from astropylibrarian.algolia.client import AlgoliaIndex
 from astropylibrarian.workflows.indexjupyterbook import index_jupyterbook
-from astropylibrarian.workflows.indextutorial import index_tutorial_from_url
+from astropylibrarian.workflows.indextutorial import (
+    index_tutorial_from_path,
+    index_tutorial_from_url,
+)
 
 app = typer.Typer(short_help="Content indexing commands.")
 
 
 @app.command()
 def tutorial(
-    url: str = typer.Argument(..., help="URL for a tutorial."),
+    url: str = typer.Argument(..., help="URL or path for a tutorial."),
     algolia_id: str = typer.Option(
         ..., help="Algolia app ID.", envvar="ALGOLIA_ID"
     ),
@@ -36,6 +41,9 @@ def tutorial(
         0,
         help="Priority for default sorting (higher numbers appear first)",
     ),
+    path: Optional[Path] = typer.Option(
+        None, help="Local path of tutorial HTML, if available."
+    ),
 ) -> None:
     """Index a single tutorial."""
     event_loop = asyncio.get_event_loop()
@@ -46,23 +54,39 @@ def tutorial(
             algolia_key=algolia_key,
             index=index,
             priority=priority,
+            path=path,
         )
     )
 
 
 async def run_index_tutorial(
-    *, url: str, algolia_id: str, algolia_key: str, index: str, priority: int
+    *,
+    url: str,
+    algolia_id: str,
+    algolia_key: str,
+    index: str,
+    priority: int,
+    path: Optional[Path] = None,
 ) -> None:
     async with aiohttp.ClientSession() as http_client:
         async with AlgoliaIndex(
             key=algolia_key, app_id=algolia_id, name=index
         ) as algolia_index:
-            await index_tutorial_from_url(
-                url=url,
-                http_client=http_client,
-                algolia_index=algolia_index,
-                priority=priority,
-            )
+            if path:
+                await index_tutorial_from_path(
+                    path=path,
+                    url=url,
+                    http_client=http_client,
+                    algolia_index=algolia_index,
+                    priority=priority,
+                )
+            else:
+                await index_tutorial_from_url(
+                    url=url,
+                    http_client=http_client,
+                    algolia_index=algolia_index,
+                    priority=priority,
+                )
 
 
 @app.command()

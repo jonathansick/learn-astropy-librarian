@@ -57,6 +57,7 @@ astropylibrarian index tutorial
       --priority INTEGER  Priority for default sorting (higher numbers appear
                           first)  [default: 0]
 
+      --path PATH         Local path of tutorial HTML, if available.
       --help              Show this message and exit.
 
 astropylibrarian index guide

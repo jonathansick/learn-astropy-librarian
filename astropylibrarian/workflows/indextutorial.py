@@ -3,9 +3,14 @@
 
 from __future__ import annotations
 
-__all__ = ["index_tutorial_from_url", "index_tutorial"]
+__all__ = [
+    "index_tutorial_from_url",
+    "index_tutorial_from_path",
+    "index_tutorial",
+]
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, List
 
 from astropylibrarian.algolia.client import generate_index_epoch
@@ -66,6 +71,57 @@ async def index_tutorial_from_url(
     tutorial_html = await download_html(url=url, http_client=http_client)
     logger.debug("Downloaded %s", url)
 
+    return await index_tutorial(
+        tutorial_html=tutorial_html,
+        algolia_index=algolia_index,
+        priority=priority,
+    )
+
+
+async def index_tutorial_from_path(
+    *,
+    path: Path,
+    url: str,
+    http_client: aiohttp.ClientSession,
+    algolia_index: AlgoliaIndexType,
+    priority: int,
+) -> List[str]:
+    """Asynchronously save records for a tutorial located at a local path to
+    Algolia (awaitable function).
+
+    Parameters
+    ----------
+    path : `pathlib.Path`
+        The path of an HTML page.
+    url : `str`
+        The URL where the page is published.
+    http_client : `aiohttp.ClientSession`
+        An open aiohttp client.
+    algolia_index
+        Algolia index created by the
+        `astropylibrarian.workflows.client.AlgoliaIndex` context manager.
+    priority : int
+        A priority level that elevates a tutorial in the UI's default sorting.
+
+    Returns
+    -------
+    object_ids : `list` of `str`
+        List of Algolia record object IDs that are saved by this indexing
+        operation.
+
+    Notes
+    -----
+    Operations performed by this workflow:
+
+    1. Open the HTML page
+    2. Reduce the tutorial
+       (~`astropylibrarian.reducers.tutorial.ReducedTutorial`)
+    3. Create records for each section
+       (`~astropylibrarian.algolia.records.TutorialSectionRecord`)
+    4. Save each record to Algolia (`index.save_objects
+       <https://www.algolia.com/doc/api-reference/api-methods/save-objects/>`_)
+    """
+    tutorial_html = HtmlPage.from_path(path=path, url=url)
     return await index_tutorial(
         tutorial_html=tutorial_html,
         algolia_index=algolia_index,
