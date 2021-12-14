@@ -1,10 +1,15 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Basic APIs for dealing with resources on the web, such as web pages."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Optional
+from pathlib import Path
+from typing import Any, Mapping, Optional, Type, TypeVar
 
 import lxml.html
+
+HtmlPageType = TypeVar("HtmlPageType", bound="HtmlPage")
 
 
 @dataclass
@@ -32,3 +37,19 @@ class HtmlPage:
     def parse(self) -> lxml.html.HtmlElement:
         """Parse the HTML content with ``lxml.html``."""
         return lxml.html.document_fromstring(self.html)
+
+    @classmethod
+    def from_path(
+        cls: Type[HtmlPageType], *, path: Path, url: str
+    ) -> HtmlPageType:
+        """Open an HtmlPage from a local file.
+
+        Parameters
+        ----------
+        path : `pathlib.Path`
+            Path to the local HTML file.
+        url : `str`
+            The URL where the tutorial is publised.
+        """
+        html = path.read_text()
+        return cls(html=html, url=url)
