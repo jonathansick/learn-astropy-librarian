@@ -60,6 +60,38 @@ astropylibrarian index tutorial
       --path PATH         Local path of tutorial HTML, if available.
       --help              Show this message and exit.
 
+astropylibrarian index tutorial-site
+------------------------------------
+
+
+::
+
+  Usage: astropylibrarian index tutorial-site [OPTIONS] SITE_DIR URL
+
+    Index a directory of tutorial HTML files.
+
+    This command is useful for automated CI workflows. The site_dir argument
+    is the directory of tutorials built by nbcollection and url is the root
+    URL where these tutorials are published on the web. This command indexes
+    each HTML file as a tutorial, except for those with paths specified in the
+    --ignore argument. The root index.html file is always ignored.
+
+  Arguments:
+    SITE_DIR  Local path tutorial build directory  [required]
+    URL       Base URL for tutorials.  [required]
+
+  Options:
+    --algolia-id TEXT   Algolia app ID.  [env var: ALGOLIA_ID; required]
+    --algolia-key TEXT  Algolia API key.  [env var: ALGOLIA_KEY; required]
+    --index TEXT        Name of the Algolia index.  [env var: ALGOLIA_INDEX;
+                        required]
+
+    --ignore TEXT       List of HTML files to ignore from indexing. The root
+                        index.html file is always excluded.  [default:
+                        (dynamic)]
+
+    --help              Show this message and exit.
+
 astropylibrarian index guide
 ----------------------------
 
