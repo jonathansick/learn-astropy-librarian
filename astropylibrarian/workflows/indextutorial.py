@@ -62,7 +62,7 @@ async def index_tutorial_from_url(
     1. Download the HTML page
        (`~astropylibrarian.workflows.download.download_html`)
     2. Reduce the tutorial
-       (~`astropylibrarian.reducers.tutorial.ReducedTutorial`)
+       (`~astropylibrarian.reducers.tutorial.ReducedTutorial`)
     3. Create records for each section
        (`~astropylibrarian.algolia.records.TutorialSectionRecord`)
     4. Save each record to Algolia (`index.save_objects
@@ -115,7 +115,7 @@ async def index_tutorial_from_path(
 
     1. Open the HTML page
     2. Reduce the tutorial
-       (~`astropylibrarian.reducers.tutorial.ReducedTutorial`)
+       (`~astropylibrarian.reducers.tutorial.ReducedTutorial`)
     3. Create records for each section
        (`~astropylibrarian.algolia.records.TutorialSectionRecord`)
     4. Save each record to Algolia (`index.save_objects
