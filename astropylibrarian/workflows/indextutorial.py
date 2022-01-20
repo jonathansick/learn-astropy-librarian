@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, List
 
 from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.tutorial import get_tutorial_reducer
+from astropylibrarian.resources import HtmlPage
 from astropylibrarian.workflows.download import download_html
 from astropylibrarian.workflows.expirerecords import expire_old_records
 
@@ -22,7 +23,6 @@ if TYPE_CHECKING:
     import aiohttp
 
     from astropylibrarian.client import AlgoliaIndexType
-    from astropylibrarian.resources import HtmlPage
 
 logger = logging.getLogger(__name__)
 
