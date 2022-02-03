@@ -143,7 +143,7 @@ async def run_index_tutorial_site(
                         priority=0,
                     )
                 )
-            asyncio.gather(*tasks)
+            await asyncio.gather(*tasks)
 
 
 async def run_index_tutorial(
