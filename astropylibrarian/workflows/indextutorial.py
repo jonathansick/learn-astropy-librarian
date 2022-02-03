@@ -13,6 +13,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, List
 
+import algoliasearch.exceptions
+
 from astropylibrarian.algolia.client import generate_index_epoch
 from astropylibrarian.reducers.tutorial import get_tutorial_reducer
 from astropylibrarian.resources import HtmlPage
@@ -160,18 +162,31 @@ async def index_tutorial(
             index_epoch=index_epoch, priority=priority
         )
     ]
-    logger.debug(
+    logger.info(
         "Indexing %d records for tutorial at %s",
         len(records),
         tutorial_html.url,
     )
 
     saved_object_ids: List[str] = []
-    response = await algolia_index.save_objects_async(records)
+    try:
+        response = await algolia_index.save_objects_async(records)
+    except algoliasearch.exceptions.RequestException as e:
+        logger.error(
+            "Error saving objects for tutorial %s:\n%s",
+            tutorial_html.url,
+            str(e),
+        )
+        return []
     for r in response.raw_responses:
         _oids = r.get("objectIds", [])
         assert isinstance(_oids, list)
         saved_object_ids.extend(_oids)
+    logger.info(
+        "Finished saving %s records for tutorial at %s",
+        len(saved_object_ids),
+        tutorial_html.url,
+    )
 
     if saved_object_ids:
         await expire_old_records(
