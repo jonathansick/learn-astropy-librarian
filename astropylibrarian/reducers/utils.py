@@ -157,6 +157,29 @@ def iter_nbcollection_sections(
     header_callback: Optional[Callable[[str], str]] = None,
     content_callback: Optional[Callable[[str], str]] = None,
 ) -> Generator[Section, None, None]:
+    """Iterate through the hierarchical sections of a nbcollection-generated
+    tutorial page
+
+    Parameters
+    ----------
+    root_element : lxml.html.HtmlElement
+        The root HTML element. For nbcollection-based pages, this should
+        be the element with the ``.jp-Notebook`` class.
+    base_url : str
+        The URL of the HTML page itself.
+    header_callback : callable
+        This callback function processes the section title. The callable takes
+        a string and returns a string.
+    content_callback : callable
+        This callback function processes the section content. The callable
+        takes a string and returns a string.
+
+    Yields
+    ------
+    section : Section
+        Yields `Section` objects for each section segment. Sections are yielded
+        depth-first. The top-level section is yielded last.
+    """
     current_section = Section(content="", headings=[], url="")
 
     for content_element in iter_nbcollection_content_elements(
@@ -165,6 +188,11 @@ def iter_nbcollection_sections(
         header_callback=header_callback,
         content_callback=content_callback,
     ):
+        logger.debug(
+            "Processing %s %s ",
+            content_element.tag,
+            content_element.attrib.get("class"),
+        )
         if content_element.tag in _HEADING_TAGS:
             # A new heading can trigger a new section.
             # First yield the current content if it already has content
@@ -181,6 +209,7 @@ def iter_nbcollection_sections(
                 )
             else:
                 header_content = content_element.text_content()
+            logger.debug("Got header %s\n", header_content)
 
             current_section = current_section.new_section(
                 tag=content_element.tag,
@@ -188,13 +217,15 @@ def iter_nbcollection_sections(
                 url=f"{base_url}#{header_id}",
             )
         else:
-            # Accumulate content into the current stack
             if content_callback:
+                new_content = content_callback(content_element.text_content())
                 current_section.content += (
                     f" {content_callback(content_element.text_content())}"
                 )
             else:
-                current_section.content += f" {content_element.text_content()}"
+                new_content = content_element.get_content()
+            current_section.content += f" {new_content}"
+            logger.debug("Got content\n%s\n", new_content)
 
     if current_section.headings:
         yield current_section
@@ -207,18 +238,38 @@ def iter_nbcollection_content_elements(
     header_callback: Optional[Callable[[str], str]] = None,
     content_callback: Optional[Callable[[str], str]] = None,
 ) -> Generator[lxml.html.HtmlElement, None, None]:
+    """Iterate through the content elements in an nbcollection-generated
+    HTML document.
+
+    This function is means to be used by `iter_nbcollection_sections`
+
+    Yields
+    ------
+    content_element
+        An lxml.html.HtmlElement with useful content.
+
+    Notes
+    -----
+    This method yields the child elements of two kinds of wrapper elements:
+
+    - The div with a ``jp-RenderedHtmlCommon`` class inside the
+      ``div.jp-Cell-inputWrapper``. These are prose cells.
+      Elements yielded from this wrapper include headers (``h1``, ``h2``, etc)
+      and content like ``p`` tags.
+    - The div with a ``jp-CodeMirrorEditor`` class inside ``div.jp-CodeCell``.
+      These are source code content cells, without the outputs that we don't
+      index.
+    """
     for element in root_element:
-        if "jp-RenderedHTMLCommon" in root_element.classes:
-            for child_element in element:
-                yield element
-        elif "CodeMirror" in root_element.classes:
-            yield element
-        elif element.tag == "div":
-            yield from iter_nbcollection_content_elements(
-                root_element=element,
-                base_url=base_url,
-                header_callback=header_callback,
-                content_callback=content_callback,
-            )
+        if "jp-Cell-inputWrapper" in element.classes:
+            parents = element.cssselect(".jp-RenderedHTMLCommon")
+            for parent in parents:
+                for content_element in parent:
+                    yield content_element
+        elif "jp-CodeCell" in element.classes:
+            parents = element.cssselect(".jp-CodeMirrorEditor")
+            for parent in parents:
+                for content_element in parent:
+                    yield content_element
         else:
             continue
