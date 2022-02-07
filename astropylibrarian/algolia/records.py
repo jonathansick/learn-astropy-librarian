@@ -5,13 +5,17 @@ from __future__ import annotations
 
 __all__ = ["ContentType", "AlgoliaRecord", "TutorialRecord", "GuideRecord"]
 
+import copy
 import datetime
 import json
+import math
+import re
 from base64 import b64encode
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 from urllib.parse import urlparse, urlunparse
 
+from more_itertools import chunked
 from pydantic import UUID4, BaseModel, Field, HttpUrl, validator
 
 if TYPE_CHECKING:
@@ -148,6 +152,9 @@ class AlgoliaRecord(BaseModel):
         """Export this model into an object that can be uploaded with the
         Algolia client.
 
+        For a method that yields records to fit inside Algolia record size
+        caps, see `export_capped_records_to_algolia`.
+
         Notes
         -----
         This method:
@@ -159,6 +166,60 @@ class AlgoliaRecord(BaseModel):
         """
         json_data = self.json(exclude_none=True)
         return json.loads(json_data)
+
+    def export_capped_records_to_algolia(
+        self, max_size: int = 9500
+    ) -> Iterator[Dict[str, Any]]:
+        """Yield objects for upload to Algolia from this record that each
+        fit within the Algolia size cap for an individual record.
+
+        Parameters
+        ----------
+        max_size : int
+            The maximum record size, in bytes.
+
+        Yields
+        ------
+        algolia_record : dict
+            An individual Algolia object derived from this record (see
+            `export_to_algolia`). If the entire record can fit within the size
+            cap, that is the only record yield. Otherwise, the ``content`` is
+            split across multiple sub-records that fit within the size cap.
+            Each sub-record has an integer suffix added to the ``objectID``.
+        """
+        json_record = self.export_to_algolia()
+        total_bytes = len(json.dumps(json_record).encode("utf-8"))
+
+        if total_bytes < max_size:
+            yield json_record
+
+        else:
+            # split content by sentences.
+            content_chunks = re.split(r"\. ", self.content)
+            split_by = math.ceil(total_bytes / max_size)
+            part_size = math.floor(len(content_chunks) / split_by)
+            for i, chunk in enumerate(chunked(content_chunks, part_size), 1):
+                sub_record = copy.deepcopy(self)
+                sub_record.content = ". ".join(chunk)
+                # patch the object ID with a chunk number suffix
+                sub_record.objectID = f"{self.objectID}-{i}"
+                yield sub_record.export_to_algolia()
+
+    def split(self, number: int) -> List[AlgoliaRecord]:
+        """Split a record in a given number of parts; evenly distributing
+        the content between parts.
+        """
+        p = re.compile(r"\. ")
+        content_chunks = p.split(self.content)
+        part_size = math.floor(len(content_chunks) / number)
+        split_records: List[AlgoliaRecord] = []
+        for i, chunk in enumerate(chunked(content_chunks, part_size), 1):
+            new_record = copy.deepcopy(self)
+            new_record.content = ". ".join(chunk)
+            # patch the object ID with a chunk number suffix
+            new_record.objectID = f"{self.objectID}-{i}"
+            split_records.append(new_record)
+        return split_records
 
 
 class TutorialRecord(AlgoliaRecord):
