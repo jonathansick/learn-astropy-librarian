@@ -152,7 +152,7 @@ class ReducedTutorial:
         for record in self.iter_records(
             index_epoch=index_epoch, priority=priority
         ):
-            yield record.export_to_algolia()
+            yield from record.export_capped_records_to_algolia()
 
     def _set_summary_on_h1_section(self) -> None:
         """Replaces the content of the "h1" section, which should be empty,
