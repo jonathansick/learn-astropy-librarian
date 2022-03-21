@@ -44,7 +44,7 @@ jobs:
 
       - name: Cache tox environments
         id: cache-tox
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .tox
           key: tox-typing-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('tox.ini') }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: Cache tox environments
         id: cache-tox
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .tox
           key: tox-${{ matrix.python-version }}-${{ hashFiles('setup.cfg') }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('tox.ini') }}
